@@ -1,10 +1,15 @@
 'use client';
 
+import { useState } from 'react';
 import { Icon, StreamBadge, Avatar, Card, Button, ScreenHeader } from '@/components/ui';
 import { CURRENT_USER, STREAMS, orgById } from '@/lib/data';
+import { useAppContext } from '@/components/app-shell';
 
 export function Settings({ onToast }: { onToast: (t: string) => void }) {
   const me = CURRENT_USER;
+  const { userStreams, toggleStream } = useAppContext();
+  const [digestFreq, setDigestFreq] = useState(1); // 0=Daily, 1=Weekly, 2=Never
+
   return (
     <div className="myc-main-inner" style={{ paddingTop: 20 }}>
       <ScreenHeader eyebrow="Profile & Settings" title="Your profile" subtitle="Update what other members see, your interest streams, and how you want to be notified." />
@@ -26,10 +31,18 @@ export function Settings({ onToast }: { onToast: (t: string) => void }) {
             <Button variant="primary" onClick={() => onToast('Profile saved.')}>Save</Button>
           </Card>
           <Card padding="lg">
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, margin: '0 0 14px' }}>Your streams</h3>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, margin: '0 0 4px' }}>Your streams</h3>
+            <p style={{ fontSize: 12.5, color: 'var(--myc-text-2)', margin: '0 0 14px' }}>
+              {userStreams.length} selected — these shape your feed, campaigns, and connections.
+            </p>
             <div className="myc-stream-grid">
               {STREAMS.map(s => (
-                <div key={s.id} className={`myc-stream-card ${me.streams.includes(s.id) ? 'is-selected' : ''}`}>
+                <div key={s.id}
+                  className={`myc-stream-card ${userStreams.includes(s.id) ? 'is-selected' : ''}`}
+                  onClick={() => {
+                    toggleStream(s.id);
+                    onToast(userStreams.includes(s.id) ? `Removed ${s.short} from your streams.` : `Added ${s.short} to your streams.`);
+                  }}>
                   <span className="myc-stream-card-dot" style={{ background: s.dot }} />
                   <span className="myc-stream-card-label">{s.label}</span>
                   <span className="myc-stream-card-check"><Icon name="check" size={14} /></span>
@@ -44,7 +57,7 @@ export function Settings({ onToast }: { onToast: (t: string) => void }) {
             <div className="myc-form-field"><label className="myc-form-label">Email digest</label>
               <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
                 {['Daily', 'Weekly', 'Never'].map((opt, i) => (
-                  <button key={opt} className={`myc-pill ${i === 1 ? 'is-active' : ''}`}>{opt}</button>
+                  <button key={opt} className={`myc-pill ${i === digestFreq ? 'is-active' : ''}`} onClick={() => { setDigestFreq(i); onToast(`Digest set to ${opt.toLowerCase()}.`); }}>{opt}</button>
                 ))}
               </div>
             </div>
@@ -61,7 +74,7 @@ export function Settings({ onToast }: { onToast: (t: string) => void }) {
             </p>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', padding: '10px 12px', background: 'var(--myc-surface-2)', borderRadius: 8, fontFamily: 'var(--font-mono)', fontSize: 11.5 }}>
               <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>https://mcp.mycelium.org/u/maral-7f29c1</span>
-              <button onClick={() => onToast('Copied.')} style={{ border: 0, background: 'transparent', padding: 4, cursor: 'pointer', color: 'var(--myc-text-2)' }}><Icon name="external" size={13} /></button>
+              <button onClick={() => { navigator.clipboard.writeText('https://mcp.mycelium.org/u/maral-7f29c1'); onToast('Copied to clipboard.'); }} style={{ border: 0, background: 'transparent', padding: 4, cursor: 'pointer', color: 'var(--myc-text-2)' }}><Icon name="external" size={13} /></button>
             </div>
           </Card>
         </div>

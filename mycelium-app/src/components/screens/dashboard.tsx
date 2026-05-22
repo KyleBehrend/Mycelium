@@ -1,31 +1,38 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Icon, StreamBadge, Avatar, Card, Button, MyceliumMark, MyceliumPattern, NetworkGraph } from '@/components/ui';
 import { CURRENT_USER, CAMPAIGNS, LEARNINGS, LEARNING_FEED, SOCIAL_POSTS, UPCOMING_TASKS, orgById, personById, streamById } from '@/lib/data';
+import { useAppContext } from '@/components/app-shell';
 
 export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onToast: (t: string) => void }) {
   const me = CURRENT_USER;
+  const { userStreams, activeStreamFilter } = useAppContext();
+  const [feedFilter, setFeedFilter] = useState<'all' | 'yours'>('all');
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const firstName = me.name.split(' ')[0];
 
   const feedItems = useMemo(() => {
     const items: { kind: string; id: string; when: string; data: any }[] = [];
-    CAMPAIGNS.filter(c => c.streams.some(s => me.streams.includes(s))).slice(0, 2).forEach(c => {
+    const streamSet = activeStreamFilter ? [activeStreamFilter] : (feedFilter === 'yours' ? userStreams : null);
+    const matchesStream = (itemStreams: string[]) => !streamSet || itemStreams.some(s => streamSet.includes(s));
+    const matchesSingleStream = (stream: string) => !streamSet || streamSet.includes(stream);
+
+    CAMPAIGNS.filter(c => matchesStream(c.streams)).slice(0, 2).forEach(c => {
       items.push({ kind: 'campaign', id: c.id, when: 'Live now', data: c });
     });
-    LEARNINGS.filter(l => l.streams.some(s => me.streams.includes(s))).slice(0, 1).forEach(l => {
+    LEARNINGS.filter(l => matchesStream(l.streams)).slice(0, 2).forEach(l => {
       items.push({ kind: 'learning', id: l.id, when: l.when, data: l });
     });
-    LEARNING_FEED.filter(lf => me.streams.includes(lf.stream)).slice(0, 1).forEach(lf => {
+    LEARNING_FEED.filter(lf => matchesSingleStream(lf.stream)).slice(0, 1).forEach(lf => {
       items.push({ kind: 'news', id: lf.id, when: lf.when, data: lf });
     });
-    SOCIAL_POSTS.filter(p => p.streams.some(s => me.streams.includes(s))).slice(0, 1).forEach(p => {
+    SOCIAL_POSTS.filter(p => matchesStream(p.streams)).slice(0, 2).forEach(p => {
       items.push({ kind: 'social', id: p.id, when: p.when, data: p });
     });
     return items;
-  }, [me]);
+  }, [userStreams, activeStreamFilter, feedFilter]);
 
   return (
     <div className="myc-main-inner">
@@ -77,8 +84,8 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: 14 }}>
             <h2 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 600, letterSpacing: -0.2 }}>For you, today</h2>
             <div className="myc-pill-row" style={{ marginBottom: 0 }}>
-              <button className="myc-pill is-active">All streams</button>
-              <button className="myc-pill">In your streams</button>
+              <button className={`myc-pill ${feedFilter === 'all' && !activeStreamFilter ? 'is-active' : ''}`} onClick={() => setFeedFilter('all')}>All streams</button>
+              <button className={`myc-pill ${feedFilter === 'yours' || activeStreamFilter ? 'is-active' : ''}`} onClick={() => setFeedFilter('yours')}>In your streams</button>
             </div>
           </div>
           <div className="myc-grid-feed">
