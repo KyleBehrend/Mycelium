@@ -63,13 +63,26 @@ function CalendarMonth({ campaigns, onSelect, month, year, onPrev, onNext, onTod
   for (let d = 1; d <= daysInMonth; d++) cells.push({ kind: 'cur', day: d });
   while (cells.length % 7 !== 0) cells.push({ kind: 'next', day: cells.length - daysInMonth - startOffset + 1 });
 
-  const eventsForDay = (day: number) => {
-    const date = new Date(year, month, day);
-    return campaigns.filter(c => {
-      const s = new Date(c.start); const e = new Date(c.end);
-      return date >= s && date <= e;
-    });
+  const parseDate = (str: string) => {
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
   };
+  // Show each campaign once per month — on its start day if it starts this
+  // month, otherwise pinned to day 1 as an ongoing campaign. Prevents a
+  // multi-week campaign from being repeated in every day cell it spans.
+  const monthStart = new Date(year, month, 1);
+  const monthEnd = new Date(year, month, daysInMonth);
+  const eventsByDay = new Map<number, Campaign[]>();
+  campaigns.forEach(c => {
+    const s = parseDate(c.start);
+    const e = parseDate(c.end);
+    if (e < monthStart || s > monthEnd) return;
+    const day = s >= monthStart && s <= monthEnd ? s.getDate() : 1;
+    const arr = eventsByDay.get(day) || [];
+    arr.push(c);
+    eventsByDay.set(day, arr);
+  });
+  const eventsForDay = (day: number) => eventsByDay.get(day) || [];
 
   return (
     <div>
