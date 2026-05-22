@@ -20,6 +20,7 @@ export function CommandPalette({ open, onClose, onNav, onAskAI }: {
       { kind: 'nav', icon: 'home', label: 'Dashboard', target: 'dashboard', hint: 'Go to' },
       { kind: 'nav', icon: 'sparkles', label: 'Ask the Knowledge Assistant', target: 'knowledge', hint: 'Open' },
       { kind: 'nav', icon: 'book', label: 'Resource Library', target: 'knowledge', hint: 'Browse' },
+      { kind: 'nav', icon: 'sprout', label: 'Signals — Live News', target: 'signals', hint: 'View' },
       { kind: 'nav', icon: 'calendar', label: 'Campaign Calendar', target: 'calendar', hint: 'View' },
       { kind: 'nav', icon: 'megaphone', label: 'Community — Social & Learnings', target: 'community', hint: 'Visit' },
       { kind: 'nav', icon: 'users', label: 'Member Directory', target: 'directory', hint: 'Browse' },

@@ -11,9 +11,10 @@ import { Directory } from '@/components/screens/directory';
 import { Admin } from '@/components/screens/admin';
 import { Settings } from '@/components/screens/settings';
 import { Onboarding } from '@/components/screens/onboarding';
+import { Signals } from '@/components/screens/signals';
 import { CommandPalette } from '@/components/command-palette';
 
-type Screen = 'dashboard' | 'knowledge' | 'calendar' | 'community' | 'directory' | 'admin' | 'settings' | 'onboarding';
+type Screen = 'dashboard' | 'knowledge' | 'signals' | 'calendar' | 'community' | 'directory' | 'admin' | 'settings' | 'onboarding';
 
 type AppContextType = {
   userStreams: string[];
@@ -72,6 +73,7 @@ export function AppShell() {
   const nav = [
     { id: 'dashboard' as const, label: 'Dashboard', icon: 'home' },
     { id: 'knowledge' as const, label: 'Knowledge Hub', icon: 'sparkles' },
+    { id: 'signals' as const, label: 'Signals', icon: 'sprout' },
     { id: 'calendar' as const, label: 'Campaign Calendar', icon: 'calendar' },
     { id: 'community' as const, label: 'Community', icon: 'megaphone' },
     { id: 'directory' as const, label: 'Member Directory', icon: 'users' },
@@ -175,6 +177,7 @@ export function AppShell() {
         <main className="myc-main">
           {screen === 'dashboard' && <Dashboard onNav={navigateTo} onToast={toast} />}
           {screen === 'knowledge' && <KnowledgeHub onToast={toast} />}
+          {screen === 'signals' && <Signals onToast={toast} />}
           {screen === 'calendar' && <CampaignCalendar onToast={toast} />}
           {screen === 'community' && <Community onToast={toast} />}
           {screen === 'directory' && <Directory onToast={toast} />}

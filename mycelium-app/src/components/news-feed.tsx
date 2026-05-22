@@ -5,7 +5,7 @@ import { Icon, StreamBadge, Card, Button } from '@/components/ui';
 import { useAppContext } from '@/components/app-shell';
 import { timeAgo, type NewsItem } from '@/lib/news';
 
-export function SignalsWidget() {
+export function SignalsWidget({ onNav }: { onNav?: (s: string) => void }) {
   const { userStreams } = useAppContext();
   const [items, setItems] = useState<NewsItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,11 +88,11 @@ export function SignalsWidget() {
         </a>
       ))}
 
-      {!loading && !error && items.length > 5 && (
+      {!loading && !error && items.length > 0 && (
         <div style={{ textAlign: 'center', paddingTop: 8 }}>
-          <span style={{ fontSize: 12, color: 'var(--myc-accent)', fontWeight: 500, cursor: 'pointer' }}>
-            {items.length - 5} more signals →
-          </span>
+          <button onClick={() => onNav?.('signals')} style={{ fontSize: 12, color: 'var(--myc-accent)', fontWeight: 500, cursor: 'pointer', background: 'transparent', border: 0, fontFamily: 'inherit' }}>
+            View all signals →
+          </button>
         </div>
       )}
     </Card>

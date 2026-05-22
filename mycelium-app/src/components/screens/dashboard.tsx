@@ -132,7 +132,7 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
             </div>
           </Card>
 
-          <SignalsWidget />
+          <SignalsWidget onNav={onNav} />
 
           <Card padding="md" style={{ background: 'linear-gradient(135deg, #F6F4EF, #FAFAF8)', borderColor: '#E8E0CF' }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
