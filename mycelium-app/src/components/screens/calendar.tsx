@@ -67,20 +67,25 @@ function CalendarMonth({ campaigns, onSelect, month, year, onPrev, onNext, onTod
     const [y, m, d] = str.split('-').map(Number);
     return new Date(y, m - 1, d);
   };
-  // Show each campaign once per month — on its start day if it starts this
-  // month, otherwise pinned to day 1 as an ongoing campaign. Prevents a
-  // multi-week campaign from being repeated in every day cell it spans.
+  // Campaigns that KICK OFF this month land on the grid (on their start day).
+  // Campaigns already running when the month begins go into a separate
+  // "Running all month" list, so multi-week campaigns don't repeat across every
+  // cell or pile onto day 1.
   const monthStart = new Date(year, month, 1);
   const monthEnd = new Date(year, month, daysInMonth);
   const eventsByDay = new Map<number, Campaign[]>();
+  const ongoing: Campaign[] = [];
   campaigns.forEach(c => {
     const s = parseDate(c.start);
     const e = parseDate(c.end);
-    if (e < monthStart || s > monthEnd) return;
-    const day = s >= monthStart && s <= monthEnd ? s.getDate() : 1;
-    const arr = eventsByDay.get(day) || [];
-    arr.push(c);
-    eventsByDay.set(day, arr);
+    if (e < monthStart || s > monthEnd) return; // not active this month
+    if (s >= monthStart && s <= monthEnd) {
+      const arr = eventsByDay.get(s.getDate()) || [];
+      arr.push(c);
+      eventsByDay.set(s.getDate(), arr);
+    } else {
+      ongoing.push(c);
+    }
   });
   const eventsForDay = (day: number) => eventsByDay.get(day) || [];
 
@@ -94,6 +99,23 @@ function CalendarMonth({ campaigns, onSelect, month, year, onPrev, onNext, onTod
           <button className="myc-btn myc-btn-ghost myc-btn-sm" style={{ padding: 6 }} onClick={onNext}><Icon name="chevR" size={14} /></button>
         </div>
       </div>
+      {ongoing.length > 0 && (
+        <div className="myc-cal-ongoing">
+          <div className="myc-cal-ongoing-label">Running all month · {ongoing.length}</div>
+          <div className="myc-cal-ongoing-list">
+            {ongoing.map(c => {
+              const s = streamById(c.streams[0]);
+              return (
+                <button key={c.id} className="myc-cal-ongoing-chip" onClick={() => onSelect(c)}
+                  style={{ background: `${s.color}14`, color: s.color, borderColor: `${s.color}33` }}>
+                  <span style={{ width: 6, height: 6, borderRadius: 999, background: s.dot, display: 'inline-block', flexShrink: 0 }} />
+                  {c.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
       <div className="myc-cal-grid">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <div key={d} className="myc-cal-head">{d}</div>)}
         {cells.map((c, i) => {
