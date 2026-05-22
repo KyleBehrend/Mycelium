@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mycelium — Dashboard Variations</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Newsreader:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="src/styles.css" />
+
+<template id="__bundler_thumbnail">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <rect width="200" height="200" fill="#F6F4EE"/>
+  <rect x="22" y="22" width="50" height="156" rx="6" fill="#1B4332"/>
+  <rect x="80" y="22" width="50" height="156" rx="6" fill="#fff" stroke="#DCD7C8" stroke-width="2"/>
+  <rect x="138" y="22" width="40" height="156" rx="6" fill="#0B1410"/>
+  <circle cx="158" cy="100" r="8" fill="#74C69D"/>
+  <g stroke="#74C69D" stroke-width="0.8" opacity="0.7"><path d="M158 100 L150 80 M158 100 L168 80 M158 100 L150 120 M158 100 L168 120"/></g>
+</svg>
+</template>
+
+<style>
+  /* Canvas-specific overrides */
+  body { background: #f0eee9; }
+  .dc-card { background: var(--myc-bg, #FAFAF8); }
+</style>
+</head>
+<body>
+<div id="canvas-root"></div>
+
+<script src="src/data.js"></script>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<script type="text/babel" src="design-canvas.jsx"></script>
+<script type="text/babel" src="src/components.jsx"></script>
+<script type="text/babel" src="src/variation-faithful.jsx"></script>
+<script type="text/babel" src="src/variation-editorial.jsx"></script>
+<script type="text/babel" src="src/variation-experimental.jsx"></script>
+
+<script type="text/babel">
+  function CanvasApp() {
+    return (
+      <DesignCanvas>
+        <DCSection id="dash" title="Mycelium · Dashboard" subtitle="Three directions for the daily landing screen. Each tells a different story about what the platform IS.">
+          <DCArtboard id="faithful" label="A · Faithful — Notion-meets-NGO" width={1280} height={880}>
+            <VariationFaithful />
+          </DCArtboard>
+          <DCArtboard id="editorial" label="B · Editorial — Daily morning brief" width={1280} height={880}>
+            <VariationEditorial />
+          </DCArtboard>
+          <DCArtboard id="experimental" label="C · Experimental — The Network as Interface" width={1280} height={880}>
+            <VariationExperimental />
+          </DCArtboard>
+        </DCSection>
+      </DesignCanvas>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('canvas-root')).render(<CanvasApp />);
+</script>
+</body>
+</html>
