@@ -10,7 +10,10 @@ export function Community({ onToast }: { onToast: (t: string) => void }) {
     <div className="myc-main-inner" style={{ paddingTop: 20 }}>
       <ScreenHeader eyebrow="Community" title="Support each other's work"
         subtitle="Amplify campaigns by engaging with each other's social posts. Share insights, wins, and lessons learned. The flywheel of the movement runs on this page."
-        actions={<Button variant="primary" icon="plus">New post</Button>} />
+        actions={<Button variant="primary" icon="plus" onClick={() => {
+          const el = document.getElementById('submit-post-form');
+          if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => { const input = el.querySelector('input'); input?.focus(); }, 400); }
+        }}>New post</Button>} />
       <div className="myc-tabs">
         <button className={`myc-tab ${tab === 'social' ? 'is-active' : ''}`} onClick={() => setTab('social')}>Social Engagement</button>
         <button className={`myc-tab ${tab === 'learnings' ? 'is-active' : ''}`} onClick={() => setTab('learnings')}>Learnings Board</button>
@@ -22,17 +25,19 @@ export function Community({ onToast }: { onToast: (t: string) => void }) {
 
 function SocialHubPanel({ onToast }: { onToast: (t: string) => void }) {
   const [engaged, setEngaged] = useState<Record<string, boolean>>({});
+  const [platformFilter, setPlatformFilter] = useState<string>('all');
+  const filteredPosts = platformFilter === 'all' ? SOCIAL_POSTS : SOCIAL_POSTS.filter(p => p.platform === platformFilter);
   return (
     <div className="myc-grid-2">
       <div>
         <div className="myc-pill-row">
-          <button className="myc-pill is-active">All platforms</button>
-          <button className="myc-pill">LinkedIn</button>
-          <button className="myc-pill">X / Twitter</button>
-          <button className="myc-pill">Instagram</button>
+          <button className={`myc-pill ${platformFilter === 'all' ? 'is-active' : ''}`} onClick={() => setPlatformFilter('all')}>All platforms</button>
+          <button className={`myc-pill ${platformFilter === 'linkedin' ? 'is-active' : ''}`} onClick={() => setPlatformFilter('linkedin')}>LinkedIn</button>
+          <button className={`myc-pill ${platformFilter === 'twitter' ? 'is-active' : ''}`} onClick={() => setPlatformFilter('twitter')}>X / Twitter</button>
+          <button className={`myc-pill ${platformFilter === 'instagram' ? 'is-active' : ''}`} onClick={() => setPlatformFilter('instagram')}>Instagram</button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {SOCIAL_POSTS.map(p => {
+          {filteredPosts.map(p => {
             const author = personById(p.user);
             const org = orgById(p.org);
             const isEngaged = engaged[p.id];
@@ -66,7 +71,7 @@ function SocialHubPanel({ onToast }: { onToast: (t: string) => void }) {
                           onClick={() => { setEngaged(e => ({ ...e, [p.id]: true })); onToast('Thanks. Your engagement counts.'); }}>
                           {isEngaged ? 'Engaged' : 'I engaged'}
                         </Button>
-                        <Button variant="ghost" size="sm" icon="external">Open</Button>
+                        <Button variant="ghost" size="sm" icon="external" onClick={() => onToast('Opening post on ' + p.platform + '...')}>Open</Button>
                       </div>
                     </div>
                   </div>
@@ -98,7 +103,7 @@ function SocialHubPanel({ onToast }: { onToast: (t: string) => void }) {
             );
           })}
         </Card>
-        <Card padding="md">
+        <Card padding="md" id="submit-post-form">
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 14.5, fontWeight: 600, margin: '0 0 12px' }}>Submit your post</h3>
           <div className="myc-form-field"><label className="myc-form-label">Link to post</label><input className="myc-form-input" placeholder="https://linkedin.com/..." /></div>
           <div className="myc-form-field"><label className="myc-form-label">What&apos;s the ask?</label><textarea className="myc-form-textarea" placeholder="e.g. Repost + tag one MEP from your country" /></div>

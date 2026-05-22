@@ -9,6 +9,7 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
   const me = CURRENT_USER;
   const { userStreams, activeStreamFilter } = useAppContext();
   const [feedFilter, setFeedFilter] = useState<'all' | 'yours'>('all');
+  const [checkedTasks, setCheckedTasks] = useState<Record<number, boolean>>({});
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const firstName = me.name.split(' ')[0];
@@ -100,19 +101,22 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
           <Card padding="md">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
               <h3 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 14.5, fontWeight: 600 }}>Your follow-throughs</h3>
-              <span style={{ fontSize: 11.5, color: 'var(--myc-text-2)' }}>4 open</span>
+              <span style={{ fontSize: 11.5, color: 'var(--myc-text-2)' }}>{UPCOMING_TASKS.length - Object.values(checkedTasks).filter(Boolean).length} open</span>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {UPCOMING_TASKS.map((t, i) => (
-                <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i === UPCOMING_TASKS.length - 1 ? 'none' : '1px solid var(--myc-border-soft)', cursor: 'pointer' }}>
-                  <input type="checkbox" style={{ accentColor: 'var(--myc-primary)', width: 14, height: 14 }} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 500 }}>{t.label}</div>
-                    <div style={{ fontSize: 11.5, color: 'var(--myc-text-2)', marginTop: 2 }}>{t.due}</div>
-                  </div>
-                  <StreamBadge stream={t.stream} />
-                </label>
-              ))}
+              {UPCOMING_TASKS.map((t, i) => {
+                const done = !!checkedTasks[i];
+                return (
+                  <label key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: i === UPCOMING_TASKS.length - 1 ? 'none' : '1px solid var(--myc-border-soft)', cursor: 'pointer', opacity: done ? 0.45 : 1, transition: 'opacity 0.2s' }}>
+                    <input type="checkbox" checked={done} onChange={() => setCheckedTasks(prev => ({ ...prev, [i]: !prev[i] }))} style={{ accentColor: 'var(--myc-primary)', width: 14, height: 14 }} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 500, textDecoration: done ? 'line-through' : 'none' }}>{t.label}</div>
+                      <div style={{ fontSize: 11.5, color: 'var(--myc-text-2)', marginTop: 2, textDecoration: done ? 'line-through' : 'none' }}>{t.due}</div>
+                    </div>
+                    <StreamBadge stream={t.stream} />
+                  </label>
+                );
+              })}
             </div>
           </Card>
 
@@ -135,7 +139,7 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Track Lead pinned</div>
                 <div style={{ fontSize: 12.5, color: 'var(--myc-text-2)', lineHeight: 1.5 }}>
-                  Elena Marchetti has pinned the End-the-Cage MEP outreach template. <span className="myc-link">Open it →</span>
+                  Elena Marchetti has pinned the End-the-Cage MEP outreach template. <span className="myc-link" onClick={() => onNav('knowledge')} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>Open it →</span>
                 </div>
               </div>
             </div>

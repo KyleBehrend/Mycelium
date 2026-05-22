@@ -6,20 +6,23 @@ import { CURRENT_USER, STREAMS, KNOWLEDGE_DOCS, LEARNING_FEED, streamById } from
 
 export function KnowledgeHub({ onToast }: { onToast: (t: string) => void }) {
   const [tab, setTab] = useState('chat');
+  const [chatKey, setChatKey] = useState(0);
+  const [freshThread, setFreshThread] = useState(false);
+  const newThread = () => { setChatKey(k => k + 1); setFreshThread(true); };
   return (
     <div className="myc-main-inner" style={{ paddingTop: 20 }}>
       <ScreenHeader
         eyebrow="Knowledge Hub"
         title="The collective memory of the movement"
         subtitle="Search across summit transcripts, SPA curriculum, retail playbooks, campaign post-mortems, and Faunalytics research. Ask in plain language — the assistant cites sources."
-        actions={<Button variant="secondary" icon="plus">New thread</Button>}
+        actions={<Button variant="secondary" icon="plus" onClick={newThread}>New thread</Button>}
       />
       <div className="myc-tabs">
         <button className={`myc-tab ${tab === 'chat' ? 'is-active' : ''}`} onClick={() => setTab('chat')}>AI Assistant</button>
         <button className={`myc-tab ${tab === 'library' ? 'is-active' : ''}`} onClick={() => setTab('library')}>Resource Library</button>
         <button className={`myc-tab ${tab === 'feed' ? 'is-active' : ''}`} onClick={() => setTab('feed')}>Learning Feed</button>
       </div>
-      {tab === 'chat' && <ChatPanel onToast={onToast} />}
+      {tab === 'chat' && <ChatPanel key={chatKey} onToast={onToast} fresh={freshThread} />}
       {tab === 'library' && <LibraryPanel onToast={onToast} />}
       {tab === 'feed' && <LearningFeedPanel />}
     </div>
@@ -32,7 +35,7 @@ type ChatMsg = {
   sources?: { tag: string; label: string; note: string }[];
 };
 
-function ChatPanel({ onToast }: { onToast: (t: string) => void }) {
+function ChatPanel({ onToast, fresh }: { onToast: (t: string) => void; fresh?: boolean }) {
   const SAMPLE_THREAD: ChatMsg[] = [
     { role: 'user', content: 'What are the best practices for retail engagement campaigns in Northern Europe?' },
     {
@@ -58,7 +61,7 @@ function ChatPanel({ onToast }: { onToast: (t: string) => void }) {
     },
   ];
 
-  const [messages, setMessages] = useState<ChatMsg[]>(SAMPLE_THREAD);
+  const [messages, setMessages] = useState<ChatMsg[]>(fresh ? [] : SAMPLE_THREAD);
   const [draft, setDraft] = useState('');
   const [thinking, setThinking] = useState(false);
   const threadRef = useRef<HTMLDivElement>(null);
@@ -116,7 +119,7 @@ function ChatPanel({ onToast }: { onToast: (t: string) => void }) {
             { title: 'Cultivated meat consumer language', when: '3 days ago', active: false },
             { title: 'Default-plant menus in school systems', when: '1 week ago', active: false },
           ].map((t, i) => (
-            <button key={i} style={{
+            <button key={i} onClick={() => { if (!t.active) onToast(`Opening thread: "${t.title}"`); }} style={{
               textAlign: 'left', padding: '10px 12px', borderRadius: 8,
               background: t.active ? 'var(--myc-surface-2)' : 'transparent',
               border: 0, cursor: 'pointer', fontFamily: 'inherit',
@@ -148,7 +151,7 @@ function ChatPanel({ onToast }: { onToast: (t: string) => void }) {
               </div>
             </div>
           )}
-          {messages.length === 1 && !thinking && (
+          {messages.length <= 1 && !thinking && (
             <div className="myc-chat-suggest">
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--myc-text-3)', letterSpacing: 0.6, textTransform: 'uppercase' }}>Try asking</div>
               {suggestions.map((s, i) => (

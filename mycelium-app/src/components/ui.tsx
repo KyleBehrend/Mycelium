@@ -243,13 +243,13 @@ export function ScreenHeader({ eyebrow, title, subtitle, actions, dense }: {
   );
 }
 
-export function Card({ children, padding = 'lg', accent, style, onClick, className = '' }: {
+export function Card({ children, padding = 'lg', accent, style, onClick, className = '', id }: {
   children: React.ReactNode; padding?: 'sm' | 'md' | 'lg'; accent?: string;
-  style?: React.CSSProperties; onClick?: () => void; className?: string;
+  style?: React.CSSProperties; onClick?: () => void; className?: string; id?: string;
 }) {
   const pad = { sm: 14, md: 18, lg: 22 }[padding] || 22;
   return (
-    <div className={`myc-card ${onClick ? 'is-clickable' : ''} ${className}`}
+    <div id={id} className={`myc-card ${onClick ? 'is-clickable' : ''} ${className}`}
       onClick={onClick}
       style={{ padding: pad, borderTop: accent ? `2px solid ${accent}` : undefined, ...style }}>
       {children}

@@ -9,6 +9,9 @@ export function CampaignCalendar({ onToast }: { onToast: (t: string) => void }) 
   const [filter, setFilter] = useState('all');
   const [selected, setSelected] = useState<Campaign | null>(null);
   const [showSubmit, setShowSubmit] = useState(false);
+  const now = new Date();
+  const [calMonth, setCalMonth] = useState(now.getMonth());
+  const [calYear, setCalYear] = useState(now.getFullYear());
 
   const filtered = CAMPAIGNS.filter(c => filter === 'all' || c.streams.includes(filter));
 
@@ -20,7 +23,7 @@ export function CampaignCalendar({ onToast }: { onToast: (t: string) => void }) 
         subtitle="See key campaign moments, policy windows, and calls to action across the network. Mark which ones you'll support — your engagement helps coordinate amplification."
         actions={
           <>
-            <Button variant="secondary" icon="filter">Subscribe to .ics</Button>
+            <Button variant="secondary" icon="filter" onClick={() => onToast('Calendar .ics link copied to clipboard.')}>Subscribe to .ics</Button>
             <Button variant="primary" icon="plus" onClick={() => setShowSubmit(true)}>Submit a campaign</Button>
           </>
         }
@@ -39,26 +42,29 @@ export function CampaignCalendar({ onToast }: { onToast: (t: string) => void }) 
           <button key={v} onClick={() => setView(v)} style={{ padding: '6px 14px', borderRadius: 6, background: view === v ? '#fff' : 'transparent', border: 0, cursor: 'pointer', fontSize: 12.5, fontWeight: 500, fontFamily: 'inherit', color: view === v ? 'var(--myc-primary)' : 'var(--myc-text-2)' }}>{v === 'month' ? 'Month' : 'List'}</button>
         ))}
       </div>
-      {view === 'month' ? <CalendarMonth campaigns={filtered} onSelect={setSelected} /> : <CalendarList campaigns={filtered} onSelect={setSelected} />}
+      {view === 'month' ? <CalendarMonth campaigns={filtered} onSelect={setSelected} month={calMonth} year={calYear} onPrev={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); } else { setCalMonth(m => m - 1); } }} onNext={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); } else { setCalMonth(m => m + 1); } }} onToday={() => { setCalMonth(now.getMonth()); setCalYear(now.getFullYear()); }} /> : <CalendarList campaigns={filtered} onSelect={setSelected} />}
       {selected && <CampaignDetailModal campaign={selected} onClose={() => setSelected(null)} onToast={onToast} />}
       {showSubmit && <SubmitCampaignModal onClose={() => setShowSubmit(false)} onToast={onToast} />}
     </div>
   );
 }
 
-function CalendarMonth({ campaigns, onSelect }: { campaigns: Campaign[]; onSelect: (c: Campaign) => void }) {
-  const firstDay = new Date(2026, 5, 1).getDay();
+function CalendarMonth({ campaigns, onSelect, month, year, onPrev, onNext, onToday }: { campaigns: Campaign[]; onSelect: (c: Campaign) => void; month: number; year: number; onPrev: () => void; onNext: () => void; onToday: () => void }) {
+  const firstDay = new Date(year, month, 1).getDay();
   const startOffset = (firstDay + 6) % 7;
-  const daysInMonth = 30;
-  const today = 4;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const prevMonthDays = new Date(year, month, 0).getDate();
+  const now = new Date();
+  const todayDay = now.getFullYear() === year && now.getMonth() === month ? now.getDate() : -1;
+  const monthLabel = new Date(year, month, 1).toLocaleDateString('en', { month: 'long', year: 'numeric' });
 
   const cells: { kind: string; day: number }[] = [];
-  for (let i = 0; i < startOffset; i++) cells.push({ kind: 'prev', day: 31 - startOffset + i + 1 });
+  for (let i = 0; i < startOffset; i++) cells.push({ kind: 'prev', day: prevMonthDays - startOffset + i + 1 });
   for (let d = 1; d <= daysInMonth; d++) cells.push({ kind: 'cur', day: d });
   while (cells.length % 7 !== 0) cells.push({ kind: 'next', day: cells.length - daysInMonth - startOffset + 1 });
 
-  const inJune = (day: number) => {
-    const date = new Date(2026, 5, day);
+  const eventsForDay = (day: number) => {
+    const date = new Date(year, month, day);
     return campaigns.filter(c => {
       const s = new Date(c.start); const e = new Date(c.end);
       return date >= s && date <= e;
@@ -68,18 +74,18 @@ function CalendarMonth({ campaigns, onSelect }: { campaigns: Campaign[]; onSelec
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 600, margin: 0 }}>June 2026</h3>
+        <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 600, margin: 0 }}>{monthLabel}</h3>
         <div style={{ display: 'flex', gap: 6 }}>
-          <button className="myc-btn myc-btn-ghost myc-btn-sm" style={{ padding: 6 }}><Icon name="chevR" size={14} style={{ transform: 'rotate(180deg)' }} /></button>
-          <button className="myc-btn myc-btn-secondary myc-btn-sm">Today</button>
-          <button className="myc-btn myc-btn-ghost myc-btn-sm" style={{ padding: 6 }}><Icon name="chevR" size={14} /></button>
+          <button className="myc-btn myc-btn-ghost myc-btn-sm" style={{ padding: 6 }} onClick={onPrev}><Icon name="chevR" size={14} style={{ transform: 'rotate(180deg)' }} /></button>
+          <button className="myc-btn myc-btn-secondary myc-btn-sm" onClick={onToday}>Today</button>
+          <button className="myc-btn myc-btn-ghost myc-btn-sm" style={{ padding: 6 }} onClick={onNext}><Icon name="chevR" size={14} /></button>
         </div>
       </div>
       <div className="myc-cal-grid">
         {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <div key={d} className="myc-cal-head">{d}</div>)}
         {cells.map((c, i) => {
-          const events = c.kind === 'cur' ? inJune(c.day) : [];
-          const isToday = c.kind === 'cur' && c.day === today;
+          const events = c.kind === 'cur' ? eventsForDay(c.day) : [];
+          const isToday = c.kind === 'cur' && c.day === todayDay;
           return (
             <div key={i} className={`myc-cal-cell ${c.kind !== 'cur' ? 'is-out' : ''} ${isToday ? 'is-today' : ''}`}>
               <div className={`myc-cal-day ${c.kind !== 'cur' ? 'myc-cal-out' : ''}`}>{isToday ? <span>{c.day}</span> : c.day}</div>

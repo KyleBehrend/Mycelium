@@ -25,39 +25,43 @@ export function Admin({ onToast }: { onToast: (t: string) => void }) {
 }
 
 function AdminUsers({ onToast }: { onToast: (t: string) => void }) {
-  const pending = [
+  const INITIAL_PENDING = [
     { name: 'Helga Andersson', org: 'Nordic Plant Alliance', country: 'Sweden', invited_by: 'Mara Lindqvist', when: '2h ago' },
     { name: 'Bartosz Kwiatkowski', org: 'ProVeg Polska', country: 'Poland', invited_by: 'Tomáš Novák', when: '6h ago' },
     { name: 'Lena Vogel', org: 'Albert Schweitzer Stiftung', country: 'Germany', invited_by: 'Anke Hoffmann', when: 'yesterday' },
   ];
+  const [pending, setPending] = useState(INITIAL_PENDING);
   return (
     <div>
       <div className="myc-grid-3" style={{ marginBottom: 20 }}>
         <Card padding="md"><div className="myc-stat-label">Total members</div><div className="myc-stat-num" style={{ fontSize: 32 }}>142</div><div style={{ fontSize: 12, color: 'var(--myc-accent)' }}>+18 this month</div></Card>
-        <Card padding="md"><div className="myc-stat-label">Pending approval</div><div className="myc-stat-num" style={{ fontSize: 32 }}>3</div><div style={{ fontSize: 12, color: 'var(--myc-warm-deep)' }}>Oldest waiting: 6 hours</div></Card>
+        <Card padding="md"><div className="myc-stat-label">Pending approval</div><div className="myc-stat-num" style={{ fontSize: 32 }}>{pending.length}</div><div style={{ fontSize: 12, color: 'var(--myc-warm-deep)' }}>{pending.length > 0 ? 'Oldest waiting: 6 hours' : 'All clear'}</div></Card>
         <Card padding="md"><div className="myc-stat-label">Open invitations</div><div className="myc-stat-num" style={{ fontSize: 32 }}>7</div><div style={{ fontSize: 12, color: 'var(--myc-text-2)' }}>2 expiring this week</div></Card>
       </div>
       <Card padding="md" style={{ marginBottom: 22 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, margin: 0 }}>Pending approvals</h3>
-          <Button variant="secondary" size="sm">Approve all from summit list</Button>
+          <Button variant="secondary" size="sm" onClick={() => { setPending([]); onToast('All summit attendees approved.'); }}>Approve all from summit list</Button>
         </div>
+        {pending.length === 0 && (
+          <div style={{ padding: '18px 0', textAlign: 'center', fontSize: 13, color: 'var(--myc-text-2)' }}>No pending approvals.</div>
+        )}
         {pending.map((p, i) => (
-          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: i === pending.length - 1 ? 'none' : '1px solid var(--myc-border-soft)' }}>
+          <div key={p.name} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '12px 0', borderBottom: i === pending.length - 1 ? 'none' : '1px solid var(--myc-border-soft)' }}>
             <div style={{ width: 36, height: 36, borderRadius: 999, background: 'var(--myc-surface-2)', color: 'var(--myc-text-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontFamily: 'var(--font-display)', fontWeight: 600 }}>{p.name.split(' ').map(x => x[0]).join('')}</div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 600 }}>{p.name}</div>
               <div style={{ fontSize: 12, color: 'var(--myc-text-2)' }}>{p.org} · {p.country} · invited by {p.invited_by} · {p.when}</div>
             </div>
-            <Button variant="ghost" size="sm" onClick={() => onToast('Declined')}>Decline</Button>
-            <Button variant="primary" size="sm" icon="check" onClick={() => onToast(`Approved ${p.name}. Welcome email sent.`)}>Approve</Button>
+            <Button variant="ghost" size="sm" onClick={() => { setPending(prev => prev.filter(x => x.name !== p.name)); onToast(`Declined ${p.name}.`); }}>Decline</Button>
+            <Button variant="primary" size="sm" icon="check" onClick={() => { setPending(prev => prev.filter(x => x.name !== p.name)); onToast(`Approved ${p.name}. Welcome email sent.`); }}>Approve</Button>
           </div>
         ))}
       </Card>
       <Card padding="md">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: 16, fontWeight: 600, margin: 0 }}>Generate invitation link</h3>
-          <Button variant="primary" size="sm" icon="plus" onClick={() => onToast('Invitation link copied to clipboard.')}>Create link</Button>
+          <Button variant="primary" size="sm" icon="plus" onClick={() => onToast('Link created: https://mycelium.network/invite/xK9mQ2 — copied to clipboard.')}>Create link</Button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
           {[
