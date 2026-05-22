@@ -18,7 +18,7 @@ export function Directory({ onToast }: { onToast: (t: string) => void }) {
   return (
     <div className="myc-main-inner" style={{ paddingTop: 20 }}>
       <ScreenHeader eyebrow="Member Directory" title="The network"
-        subtitle="142 people across 12 organizations in 14 countries. Connections are formed through shared streams, co-authored learnings, and campaign collaborations."
+        subtitle={`142 people across ${ORGS.length} organizations in 14 countries. Connections are formed through shared streams, co-authored learnings, and campaign collaborations.`}
         actions={
           <div style={{ display: 'flex', gap: 2, background: 'var(--myc-surface-2)', padding: 3, borderRadius: 7 }}>
             {[{ id: 'network', label: 'Network' }, { id: 'grid', label: 'People' }, { id: 'orgs', label: 'Orgs' }].map(v => (
@@ -39,7 +39,7 @@ export function Directory({ onToast }: { onToast: (t: string) => void }) {
             <NetworkGraph width={1100} height={540} highlight={CURRENT_USER.org} />
           </div>
           <div style={{ position: 'absolute', bottom: 22, right: 22, zIndex: 2, display: 'flex', gap: 16, padding: '10px 14px', background: 'rgba(255,255,255,0.9)', borderRadius: 8, backdropFilter: 'blur(4px)', border: '1px solid var(--myc-border-soft)' }}>
-            {[{ n: '12', l: 'orgs' }, { n: '142', l: 'members' }, { n: '14', l: 'countries' }].map(s => (
+            {[{ n: String(ORGS.length), l: 'orgs' }, { n: '142', l: 'members' }, { n: '14', l: 'countries' }].map(s => (
               <div key={s.l} style={{ fontSize: 11.5, color: 'var(--myc-text-2)' }}>
                 <strong style={{ color: 'var(--myc-text)', fontFamily: 'var(--font-display)', fontSize: 20, display: 'block', lineHeight: 1 }}>{s.n}</strong>{s.l}
               </div>

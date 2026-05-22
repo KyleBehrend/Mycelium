@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react';
 import { Icon, StreamBadge, Avatar, Card, Button, MyceliumMark, MyceliumPattern, NetworkGraph } from '@/components/ui';
-import { CURRENT_USER, CAMPAIGNS, LEARNINGS, LEARNING_FEED, SOCIAL_POSTS, UPCOMING_TASKS, orgById, personById, streamById } from '@/lib/data';
+import { CURRENT_USER, CAMPAIGNS, LEARNINGS, LEARNING_FEED, SOCIAL_POSTS, UPCOMING_TASKS, ORGS, orgById, personById, streamById } from '@/lib/data';
 import { useAppContext } from '@/components/app-shell';
 import { SignalsWidget } from '@/components/news-feed';
 
@@ -14,6 +14,7 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
   const hour = new Date().getHours();
   const greet = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
   const firstName = me.name.split(' ')[0];
+  const summitDays = Math.max(0, Math.ceil((new Date('2026-11-21').getTime() - Date.now()) / 86400000));
 
   const feedItems = useMemo(() => {
     const items: { kind: string; id: string; when: string; data: any }[] = [];
@@ -52,13 +53,13 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
             </div>
             <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, letterSpacing: -0.6, lineHeight: 1.15 }}>
               {greet}, {firstName}.<br />
-              <span style={{ opacity: 0.7 }}>The EFSA consultation closes in 54 days.</span>
+              <span style={{ opacity: 0.7 }}>The Plant Food System Summit opens in Berlin in {summitDays} days.</span>
             </h1>
             <p style={{ margin: '14px 0 0', opacity: 0.85, fontSize: 14.5, maxWidth: 540, lineHeight: 1.55 }}>
-              <strong style={{ color: '#fff' }}>47 organizations</strong> have submitted responses so far. ProVeg has shared a 9-doc toolkit in the Hub.
+              <strong style={{ color: '#fff' }}>25 organizations across 12 countries</strong> have backed the Plant-Rich Europe call to retailers. ProVeg has shared the toolkit in the Hub.
             </p>
             <div style={{ display: 'flex', gap: 10, marginTop: 22 }}>
-              <Button variant="warm" icon="external" onClick={() => onNav('calendar')}>Open EFSA brief</Button>
+              <Button variant="warm" icon="external" onClick={() => onNav('calendar')}>See the campaign calendar</Button>
               <Button variant="ghost" onClick={() => onNav('knowledge')} style={{ color: '#fff' }}>Ask the assistant</Button>
             </div>
           </div>
@@ -68,10 +69,10 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28 }}>
         {[
-          { num: '7', label: 'Active campaigns in your streams', tint: '#2D6A4F' },
-          { num: '142', label: 'Members across 12 orgs', tint: '#40916C' },
+          { num: String(CAMPAIGNS.length), label: 'Live campaigns this quarter', tint: '#2D6A4F' },
+          { num: '142', label: `Members across ${ORGS.length} orgs`, tint: '#40916C' },
           { num: '23', label: 'New resources this week', tint: '#74C69D' },
-          { num: '54d', label: 'Until EU dietary consultation', tint: '#D4A373' },
+          { num: `${summitDays}d`, label: 'Until the Berlin Summit', tint: '#D4A373' },
         ].map((s, i) => (
           <Card key={i} padding="md" accent={s.tint}>
             <div className="myc-stat"><span className="myc-stat-num">{s.num}</span></div>

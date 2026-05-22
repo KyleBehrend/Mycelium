@@ -1,0 +1,13 @@
+node_modules
+
+# OS
+.DS_Store
+
+# tooling / agent artifacts
+.firecrawl/
+.playwright-mcp/
+.next/
+
+# build output
+out/
+build/
