@@ -14,7 +14,7 @@ export function KnowledgeHub({ onToast }: { onToast: (t: string) => void }) {
       <ScreenHeader
         eyebrow="Knowledge Hub"
         title="The collective memory of the movement"
-        subtitle="Search across summit transcripts, SPA curriculum, retail playbooks, campaign post-mortems, and Faunalytics research. Ask in plain language — the assistant cites sources."
+        subtitle="Search across summit transcripts, SPAA curriculum, retail playbooks, campaign post-mortems, and Faunalytics research. Ask in plain language — the assistant cites sources."
         actions={<Button variant="secondary" icon="plus" onClick={newThread}>New thread</Button>}
       />
       <div className="myc-tabs">
@@ -42,7 +42,7 @@ function ChatPanel({ onToast, fresh }: { onToast: (t: string) => void; fresh?: b
       role: 'assistant',
       content: (
         <>
-          <p>Based on the SPA Retail Engagement Playbook, the Albert Heijn case study, and Tom&aacute;&scaron; Nov&aacute;k&apos;s recent learning, four patterns hold consistently across NL/DK/SE pilots:</p>
+          <p>Based on the SPAA Retail Engagement Playbook, the Albert Heijn case study, and Tom&aacute;&scaron; Nov&aacute;k&apos;s recent learning, four patterns hold consistently across NL/DK/SE pilots:</p>
           <ol style={{ paddingLeft: 22, margin: '8px 0' }}>
             <li><strong>Lead with SKU economics, not values.</strong> The pitch that lands is basket-uplift data from comparable launches, plus a clean shelf plan. Mission framing loses the room.</li>
             <li><strong>Default-plant private label outperforms branded SKUs.</strong> The Albert Heijn 2025 launch hit 18% category share within 6 months by going own-brand first.</li>
@@ -81,7 +81,7 @@ function ChatPanel({ onToast, fresh }: { onToast: (t: string) => void; fresh?: b
         role: 'assistant',
         content: (
           <>
-            <p>I checked across the SPA materials and the most recent summit transcripts. Three threads worth pulling:</p>
+            <p>I checked across the SPAA materials and the most recent summit transcripts. Three threads worth pulling:</p>
             <ul>
               <li>The <strong>2024 Vienna workshop on coalition strategy</strong> (Track Lead: Elena Marchetti) covers most of this — particularly the EU-level fragmentation problem.</li>
               <li>Stray Dog Institute&apos;s <strong>grant proposal templates</strong> include a &ldquo;movement-wide coordination&rdquo; section you can adapt.</li>

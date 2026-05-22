@@ -10,8 +10,8 @@ export function CampaignCalendar({ onToast }: { onToast: (t: string) => void }) 
   const [selected, setSelected] = useState<Campaign | null>(null);
   const [showSubmit, setShowSubmit] = useState(false);
   const now = new Date();
-  const [calMonth, setCalMonth] = useState(now.getMonth());
-  const [calYear, setCalYear] = useState(now.getFullYear());
+  const [calMonth, setCalMonth] = useState(5); // June (0-indexed)
+  const [calYear, setCalYear] = useState(2026);
 
   const filtered = CAMPAIGNS.filter(c => filter === 'all' || c.streams.includes(filter));
 

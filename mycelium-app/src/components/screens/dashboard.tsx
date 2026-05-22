@@ -139,7 +139,7 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
               <div>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Track Lead pinned</div>
                 <div style={{ fontSize: 12.5, color: 'var(--myc-text-2)', lineHeight: 1.5 }}>
-                  Elena Marchetti has pinned the End-the-Cage MEP outreach template. <span className="myc-link" onClick={() => onNav('knowledge')} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>Open it →</span>
+                  Elena Marchetti has pinned the EU Protein Strategy position paper template. <span className="myc-link" onClick={() => onNav('knowledge')} role="button" tabIndex={0} style={{ cursor: 'pointer' }}>Open it →</span>
                 </div>
               </div>
             </div>

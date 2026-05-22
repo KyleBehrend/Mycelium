@@ -67,7 +67,7 @@ function AdminUsers({ onToast }: { onToast: (t: string) => void }) {
           {[
             { type: 'Summit attendees', uses: '120 / 220', expires: 'Nov 30, 2026' },
             { type: 'K4G alumni', uses: '34 / 50', expires: 'Dec 31, 2026' },
-            { type: 'SPA cohort 2026', uses: '12 / 40', expires: 'Aug 15, 2026' },
+            { type: 'SPAA cohort 2026', uses: '12 / 40', expires: 'Aug 15, 2026' },
           ].map((inv, idx) => (
             <div key={idx} style={{ padding: 14, background: 'var(--myc-surface-2)', borderRadius: 8, fontSize: 12.5 }}>
               <div style={{ fontWeight: 600, fontSize: 13, color: 'var(--myc-text)' }}>{inv.type}</div>

@@ -118,7 +118,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
               <p className="myc-onb-sub">Three things most new members do in their first week. None required, all useful.</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 {[
-                  { i: 'sparkles', t: "Ask the assistant something you've been wondering about", sub: "It's read the SPA curriculum, summit transcripts, and 1,247 docs." },
+                  { i: 'sparkles', t: "Ask the assistant something you've been wondering about", sub: "It's read the SPAA curriculum, summit transcripts, and 1,247 docs." },
                   { i: 'calendar', t: "Browse this quarter's campaign calendar", sub: 'Mark 2-3 you\'ll support. The campaign owners will see this.' },
                   { i: 'users', t: 'Introduce yourself in the Learnings Board', sub: 'A 3-sentence post about what you\'re working on goes a long way.' },
                 ].map((item, i) => (

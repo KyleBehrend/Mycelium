@@ -40,6 +40,7 @@ export function AppShell() {
   const [showOnboarding, setShowOnboarding] = useState(false);
   const [userStreams, setUserStreams] = useState<string[]>(CURRENT_USER.streams);
   const [activeStreamFilter, setActiveStreamFilter] = useState<string | null>(null);
+  const [showStreamPicker, setShowStreamPicker] = useState(false);
 
   const toggleStream = useCallback((id: string) => {
     setUserStreams(prev => prev.includes(id) ? prev.filter(s => s !== id) : [...prev, id]);
@@ -130,9 +131,22 @@ export function AppShell() {
                 </button>
               );
             })}
-            <button className="myc-nav-stream myc-nav-stream-add" onClick={() => setScreen('settings')}>
+            <button className="myc-nav-stream myc-nav-stream-add" onClick={() => setShowStreamPicker(p => !p)}>
               <Icon name="plus" size={12} /> <span>Add a stream</span>
             </button>
+            {showStreamPicker && (
+              <div style={{ background: 'var(--myc-surface)', border: '1px solid var(--myc-border-soft)', borderRadius: 10, padding: 8, margin: '4px 0', display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {STREAMS.filter(s => !userStreams.includes(s.id)).map(s => (
+                  <button key={s.id} className="myc-nav-stream" onClick={() => { toggleStream(s.id); setShowStreamPicker(false); toast(`Added ${s.short} to your streams.`); }} style={{ padding: '6px 10px' }}>
+                    <span className="myc-stream-dot" style={{ background: s.dot }} />
+                    <span>{s.label}</span>
+                  </button>
+                ))}
+                {STREAMS.filter(s => !userStreams.includes(s.id)).length === 0 && (
+                  <div style={{ fontSize: 12, color: 'var(--myc-text-3)', padding: '6px 10px' }}>All streams added</div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="myc-nav-divider" />
