@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react';
 import { Icon, StreamBadge, Avatar, Card, Button, MyceliumMark, MyceliumPattern, NetworkGraph } from '@/components/ui';
 import { CURRENT_USER, CAMPAIGNS, LEARNINGS, LEARNING_FEED, SOCIAL_POSTS, UPCOMING_TASKS, orgById, personById, streamById } from '@/lib/data';
 import { useAppContext } from '@/components/app-shell';
+import { SignalsWidget } from '@/components/news-feed';
 
 export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onToast: (t: string) => void }) {
   const me = CURRENT_USER;
@@ -130,6 +131,8 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
               <NetworkGraph width={400} height={260} highlight={me.org} />
             </div>
           </Card>
+
+          <SignalsWidget />
 
           <Card padding="md" style={{ background: 'linear-gradient(135deg, #F6F4EF, #FAFAF8)', borderColor: '#E8E0CF' }}>
             <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
