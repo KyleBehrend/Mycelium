@@ -41,13 +41,25 @@ export function parseGoogleNewsRSS(xml: string, stream: string): NewsItem[] {
     const description = block.match(/<description>([\s\S]*?)<\/description>/)?.[1]
       ?.replace(/<!\[CDATA\[|\]\]>/g, '')
       ?.replace(/<[^>]+>/g, '')
+      ?.replace(/&amp;/g, '&')
+      ?.replace(/&lt;/g, '<')
+      ?.replace(/&gt;/g, '>')
+      ?.replace(/&quot;/g, '"')
+      ?.replace(/&#39;/g, "'")
+      ?.replace(/&nbsp;/g, ' ')
       ?.trim()
       ?.substring(0, 200) || '';
+    const cleanTitle = title
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'");
 
-    if (title && !title.includes('Google News')) {
+    if (cleanTitle && !cleanTitle.includes('Google News')) {
       items.push({
         id: `news-${stream}-${idx}`,
-        title,
+        title: cleanTitle,
         source,
         url: link,
         publishedAt: pubDate,

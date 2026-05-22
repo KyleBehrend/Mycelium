@@ -122,7 +122,7 @@ export function Signals({ onToast }: { onToast: (t: string) => void }) {
                         </a>
                       </div>
                     </div>
-                    {item.snippet && (
+                    {item.snippet && !item.snippet.startsWith('http') && !item.snippet.includes('href=') && (
                       <p style={{ fontSize: 13.5, color: 'var(--myc-text-2)', lineHeight: 1.5, margin: '0 0 12px', textWrap: 'pretty' }}>
                         {item.snippet}
                       </p>
