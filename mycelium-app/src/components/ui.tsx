@@ -120,7 +120,7 @@ const STREAMS_WITH_ICON = new Set<string>([
 // backgrounds so they sit cleanly on whatever's behind them; the fallback
 // keeps the cream tile so any stream without an icon yet still reads as
 // a stream chip rather than an empty square.
-export function StreamIcon({ stream, size = 36 }: { stream: string; size?: number }) {
+export function StreamIcon({ stream, size = 36, className = '' }: { stream: string; size?: number; className?: string }) {
   const s = streamById(stream);
   if (!s) return null;
   const hasIcon = STREAMS_WITH_ICON.has(stream);
@@ -128,7 +128,7 @@ export function StreamIcon({ stream, size = 36 }: { stream: string; size?: numbe
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        className="myc-clay-ic"
+        className={`myc-clay-ic ${className}`.trim()}
         src={`/streams/${stream}.png`}
         alt=""
         style={{ width: size, height: size }}
@@ -137,7 +137,7 @@ export function StreamIcon({ stream, size = 36 }: { stream: string; size?: numbe
   }
   const radius = Math.max(4, Math.round(size * 0.22));
   return (
-    <div style={{
+    <div className={className} style={{
       width: size, height: size, borderRadius: radius,
       background: '#F5EFE3',
       display: 'flex', alignItems: 'center', justifyContent: 'center',

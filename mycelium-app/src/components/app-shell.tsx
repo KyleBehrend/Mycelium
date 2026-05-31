@@ -150,7 +150,7 @@ export function AppShell() {
         <aside className="myc-sidebar">
           <div className="myc-brand" onClick={() => setScreen('dashboard')}>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img className="myc-clay-ic" src="/logo.png" alt="Mycelium" style={{ width: 38, height: 38 }} />
+            <img src="/logo-mark.png" alt="Mycelium" style={{ width: 38, height: 38, objectFit: 'contain', flexShrink: 0 }} />
             <div>
               <div className="myc-brand-name">Mycelium</div>
               <div className="myc-brand-sub">Movement Infrastructure</div>

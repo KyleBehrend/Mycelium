@@ -26,7 +26,7 @@ export function Onboarding({ onComplete, initialStreams }: { onComplete: (stream
         <div className="myc-onb-scroll">
         <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 32 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="myc-clay-ic" src="/logo.png" alt="Mycelium" style={{ width: 40, height: 40 }} />
+          <img src="/logo-mark.png" alt="Mycelium" style={{ width: 40, height: 40, objectFit: 'contain' }} />
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--myc-text)' }}>Mycelium</div>
             <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8.5, color: 'var(--myc-text-3)', letterSpacing: 1.5, textTransform: 'uppercase' }}>Movement Infrastructure</div>
@@ -126,7 +126,7 @@ export function Onboarding({ onComplete, initialStreams }: { onComplete: (stream
                       style={{ ['--ac' as string]: s.color } as React.CSSProperties}
                       onClick={() => toggleStream(s.id)}>
                       <span className="myc-pick-check"><Icon name="check" size={11} /></span>
-                      <StreamIcon stream={s.id} size={66} />
+                      <StreamIcon stream={s.id} size={66} className="myc-pick-ic" />
                       <div className="myc-pick-nm">{s.label}</div>
                     </div>
                   );

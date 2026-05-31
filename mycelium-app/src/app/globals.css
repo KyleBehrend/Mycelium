@@ -309,6 +309,7 @@ html, body {
 }
 .myc-hero-ic {
   width: 150px; height: 150px; flex-shrink: 0; position: relative;
+  object-fit: contain; display: block;
   filter: drop-shadow(0 14px 22px rgba(60, 45, 25, 0.16));
 }
 .myc-hero-ic.is-logo { width: 128px; height: 128px; }

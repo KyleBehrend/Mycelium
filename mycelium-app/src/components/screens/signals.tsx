@@ -72,7 +72,7 @@ export function Signals({ onToast }: { onToast: (t: string) => void }) {
             const isSaved = saved[item.id];
             return (
               <div key={item.id} className="myc-sig" style={{ ['--ac' as string]: s.color, alignItems: 'flex-start' } as React.CSSProperties}>
-                <StreamIcon stream={item.stream} size={50} />
+                <StreamIcon stream={item.stream} size={50} className="myc-sig-ic" />
                 <div className="myc-sig-bd">
                   <div style={{ display: 'flex', gap: 9, alignItems: 'center', marginBottom: 5, fontSize: 12, color: 'var(--myc-text-3)', flexWrap: 'wrap' }}>
                     <span style={{ fontWeight: 500, color: 'var(--myc-text-2)' }}>{item.source}</span>

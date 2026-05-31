@@ -258,7 +258,7 @@ function LibraryPanel({ onToast }: { onToast: (t: string) => void }) {
               <div key={d.id} className="myc-res" style={{ ['--ac' as string]: s.color } as React.CSSProperties}
                 onClick={() => onToast(`Opening "${d.title}"`)}>
                 <div className="myc-res-top">
-                  <StreamIcon stream={d.stream} size={54} />
+                  <StreamIcon stream={d.stream} size={54} className="myc-res-ic" />
                   <span className="myc-res-type">{d.type.replace(/_/g, ' ')}</span>
                 </div>
                 <div className="myc-res-ti">{d.title}</div>

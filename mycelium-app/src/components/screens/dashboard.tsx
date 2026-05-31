@@ -43,7 +43,7 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
       {single ? (
         <section className="myc-hero" style={{ ['--ac' as string]: single.color } as React.CSSProperties}>
           <div className="myc-hero-wash" />
-          <StreamIcon stream={single.id} size={150} />
+          <StreamIcon stream={single.id} size={150} className="myc-hero-ic" />
           <div className="myc-hero-tx">
             <span className="myc-hero-ey"><span className="pip" />Stream · {single.label}</span>
             <h1 className="myc-hero-h">{single.label}</h1>
@@ -58,8 +58,9 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
       ) : (
         <section className="myc-hero" style={{ ['--ac' as string]: 'var(--myc-primary)' } as React.CSSProperties}>
           <div className="myc-hero-wash" />
+          {/* Transparent-background mark so it blends into the warm hero (no tile). */}
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img className="myc-clay-ic myc-hero-ic is-logo" src="/logo.png" alt="" />
+          <img className="myc-hero-ic is-logo" src="/logo-mark.png" alt="" />
           <div className="myc-hero-tx">
             <span className="myc-hero-ey"><span className="pip" />Your hub · Berlin Summit in {summitDays} days</span>
             <h1 className="myc-hero-h">{greet}, {firstName}.</h1>
@@ -94,7 +95,7 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
               className={`myc-tile ${on ? 'is-active' : ''}`}
               style={{ ['--ac' as string]: s.color } as React.CSSProperties}
               onClick={() => toggleStreamFilter(s.id)}>
-              <StreamIcon stream={s.id} size={74} />
+              <StreamIcon stream={s.id} size={74} className="myc-tile-ic" />
               <div className="myc-tile-nm">{s.label}</div>
               <div className="myc-tile-ct">{streamActivityCount(s.id)} active</div>
             </div>
