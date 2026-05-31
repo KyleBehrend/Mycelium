@@ -77,6 +77,48 @@ export function Avatar({ person, size = 32, ring = false }: { person: Person; si
   );
 }
 
+// Streams that have a real illustrated icon at /streams/<id>.png.
+// Add IDs here as Kyle ships each icon — others render the cream-tile fallback.
+const STREAMS_WITH_ICON = new Set<string>([
+  'public-health',
+]);
+
+// Illustrated stream-icon tile. Renders /streams/<id>.png for streams that have
+// one shipped, otherwise a soft cream tile with the stream's coloured dot —
+// visually consistent with the real icons while the rest of the set is in flight.
+export function StreamIcon({ stream, size = 36 }: { stream: string; size?: number }) {
+  const s = streamById(stream);
+  if (!s) return null;
+  const radius = Math.max(4, Math.round(size * 0.22));
+  const hasIcon = STREAMS_WITH_ICON.has(stream);
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: radius,
+      background: '#F5EFE3',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      overflow: 'hidden', flexShrink: 0,
+      boxShadow: '0 1px 2px rgba(20, 35, 25, 0.06)',
+    }}>
+      {hasIcon ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={`/streams/${stream}.png`}
+          alt=""
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+        />
+      ) : (
+        <span style={{
+          width: Math.round(size * 0.34),
+          height: Math.round(size * 0.34),
+          borderRadius: 999,
+          background: s.dot,
+          boxShadow: `0 0 0 ${Math.max(2, Math.round(size * 0.06))}px ${s.color}1F`,
+        }} />
+      )}
+    </div>
+  );
+}
+
 export function OrgLogo({ org, size = 28 }: { org: Org; size?: number }) {
   if (!org) return null;
   return (

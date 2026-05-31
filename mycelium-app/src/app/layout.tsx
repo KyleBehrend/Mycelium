@@ -24,7 +24,7 @@ const jetbrainsMono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: "Mycelium — Movement Infrastructure",
-  description: "Centralized movement infrastructure for plant-based food system and animal advocacy organizations.",
+  description: "Centralized movement infrastructure for organizations working on the plant-based food system transition.",
 };
 
 export default function RootLayout({

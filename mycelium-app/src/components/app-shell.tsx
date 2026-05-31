@@ -64,10 +64,26 @@ export function AppShell() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
+  // Auto-trigger the welcome flow on first visit. Re-runs only if the flag is
+  // cleared (e.g. via the "Take a tour" button below, which forces it back on).
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!window.localStorage.getItem('myc-onboarded')) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const completeOnboarding = useCallback(() => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('myc-onboarded', '1');
+    }
+    setShowOnboarding(false);
+  }, []);
+
   const navigateTo = useCallback((s: string) => setScreen(s as Screen), []);
 
   if (showOnboarding) {
-    return <Onboarding onComplete={() => setShowOnboarding(false)} />;
+    return <Onboarding onComplete={completeOnboarding} />;
   }
 
   const nav = [
@@ -123,12 +139,20 @@ export function AppShell() {
               return (
                 <button key={sid}
                   className={`myc-nav-stream ${activeStreamFilter === sid ? 'is-active' : ''}`}
-                  style={activeStreamFilter === sid ? { background: 'var(--myc-surface-2)', color: 'var(--myc-text)', fontWeight: 600 } : undefined}
+                  style={activeStreamFilter === sid ? {
+                    background: `${s.color}14`,
+                    color: s.color,
+                    fontWeight: 700,
+                    boxShadow: `inset 3px 0 0 ${s.color}`,
+                  } : undefined}
                   onClick={() => {
                     setActiveStreamFilter(activeStreamFilter === sid ? null : sid);
                     if (screen !== 'dashboard') setScreen('dashboard');
                   }}>
-                  <span className="myc-stream-dot" style={{ background: s.dot }} />
+                  <span className="myc-stream-dot" style={{
+                    background: s.dot,
+                    boxShadow: activeStreamFilter === sid ? `0 0 0 2px ${s.color}33` : undefined,
+                  }} />
                   <span>{s.label}</span>
                 </button>
               );
@@ -164,6 +188,15 @@ export function AppShell() {
             ))}
           </div>
 
+          <button
+            type="button"
+            onClick={() => setShowOnboarding(true)}
+            className="myc-sidebar-tour"
+          >
+            <Icon name="sparkles" size={13} />
+            <span>Take a tour</span>
+          </button>
+
           <div className="myc-sidebar-footer">
             <Avatar person={CURRENT_USER} size={32} />
             <div className="myc-sb-foot-meta">
@@ -175,6 +208,31 @@ export function AppShell() {
         </aside>
 
         <main className="myc-main">
+          {activeStreamFilter && (() => {
+            const s = streamById(activeStreamFilter);
+            return (
+              <div className="myc-filter-banner" style={{
+                background: `${s.color}10`,
+                borderBottom: `1px solid ${s.color}33`,
+                color: s.color,
+              }}>
+                <span style={{ width: 8, height: 8, borderRadius: 999, background: s.dot, display: 'inline-block', boxShadow: `0 0 0 3px ${s.color}22` }} />
+                <span style={{ color: 'var(--myc-text)' }}>
+                  Filtering by <strong style={{ color: s.color }}>{s.label}</strong> across your dashboard.
+                </span>
+                <button
+                  onClick={() => setActiveStreamFilter(null)}
+                  style={{
+                    marginLeft: 'auto', background: 'transparent', border: 0, cursor: 'pointer',
+                    fontFamily: 'inherit', fontSize: 12.5, fontWeight: 600, color: s.color,
+                    padding: '4px 8px', borderRadius: 6,
+                  }}
+                >
+                  Clear filter
+                </button>
+              </div>
+            );
+          })()}
           {screen === 'dashboard' && <Dashboard onNav={navigateTo} onToast={toast} />}
           {screen === 'knowledge' && <KnowledgeHub onToast={toast} />}
           {screen === 'signals' && <Signals onToast={toast} />}

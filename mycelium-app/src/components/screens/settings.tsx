@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Icon, StreamBadge, Avatar, Card, Button, ScreenHeader } from '@/components/ui';
+import { Icon, Avatar, Card, Button, ScreenHeader, StreamIcon } from '@/components/ui';
 import { CURRENT_USER, STREAMS, orgById } from '@/lib/data';
 import { useAppContext } from '@/components/app-shell';
 
@@ -43,7 +43,7 @@ export function Settings({ onToast }: { onToast: (t: string) => void }) {
                     toggleStream(s.id);
                     onToast(userStreams.includes(s.id) ? `Removed ${s.short} from your streams.` : `Added ${s.short} to your streams.`);
                   }}>
-                  <span className="myc-stream-card-dot" style={{ background: s.dot }} />
+                  <StreamIcon stream={s.id} size={36} />
                   <span className="myc-stream-card-label">{s.label}</span>
                   <span className="myc-stream-card-check"><Icon name="check" size={14} /></span>
                 </div>

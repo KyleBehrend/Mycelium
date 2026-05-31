@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Icon, Button, MyceliumMark, MyceliumPattern, NetworkGraph } from '@/components/ui';
+import { Icon, Button, MyceliumMark, MyceliumPattern, NetworkGraph, StreamIcon } from '@/components/ui';
 import { STREAMS } from '@/lib/data';
 
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
@@ -38,8 +38,30 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
             <>
               <h1 className="myc-onb-h">Welcome to Mycelium.</h1>
               <p className="myc-onb-sub">
-                You&apos;ve been invited by <strong style={{ color: 'var(--myc-text)' }}>Marcus Halberg (Stray Dog Institute)</strong> to join the network of plant-based food system and animal advocacy organizations working together.
+                You&apos;ve been invited by <strong style={{ color: 'var(--myc-text)' }}>Marcus Halberg (Stray Dog Institute)</strong> to join the network of organizations working on the plant-based food system transition.
               </p>
+              <div onClick={() => {}} style={{
+                position: 'relative', borderRadius: 14, overflow: 'hidden', marginBottom: 20,
+                background: 'linear-gradient(135deg, #1B4332 0%, #2D6A4F 60%, #40916C 100%)',
+                aspectRatio: '16 / 9', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer',
+              }}>
+                <MyceliumPattern density={1.4} opacity={0.18} color="#74C69D" />
+                <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, color: '#fff', textAlign: 'center' }}>
+                  <div style={{
+                    width: 64, height: 64, borderRadius: 999,
+                    background: 'rgba(255, 255, 255, 0.94)', color: 'var(--myc-primary)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.18)',
+                    transition: 'transform 0.18s',
+                  }}>
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7L8 5z" /></svg>
+                  </div>
+                  <div style={{ fontSize: 13, fontWeight: 500, letterSpacing: 0.3, opacity: 0.92 }}>
+                    Welcome video — 2 min · coming soon
+                  </div>
+                </div>
+              </div>
               <div style={{ background: 'var(--myc-surface)', border: '1px solid var(--myc-border-soft)', borderRadius: 12, padding: 18, marginBottom: 24 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, marginBottom: 10 }}>What you&apos;ll find inside:</div>
                 {[
@@ -100,7 +122,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
                   <div key={s.id}
                     className={`myc-stream-card ${form.streams.includes(s.id) ? 'is-selected' : ''}`}
                     onClick={() => toggleStream(s.id)}>
-                    <span className="myc-stream-card-dot" style={{ background: s.dot }} />
+                    <StreamIcon stream={s.id} size={36} />
                     <span className="myc-stream-card-label">{s.label}</span>
                     <span className="myc-stream-card-check"><Icon name="check" size={14} /></span>
                   </div>

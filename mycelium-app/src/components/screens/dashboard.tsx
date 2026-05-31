@@ -53,7 +53,7 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
             </div>
             <h1 style={{ margin: 0, fontFamily: 'var(--font-display)', fontSize: 32, fontWeight: 700, letterSpacing: -0.6, lineHeight: 1.15 }}>
               {greet}, {firstName}.<br />
-              <span style={{ opacity: 0.7 }}>The Plant Food System Summit opens in Berlin in {summitDays} days.</span>
+              <span style={{ opacity: 0.7 }}>Welcome to your hub for the Berlin Summit — opens in {summitDays} days.</span>
             </h1>
             <p style={{ margin: '14px 0 0', opacity: 0.85, fontSize: 14.5, maxWidth: 540, lineHeight: 1.55 }}>
               <strong style={{ color: '#fff' }}>25 organizations across 12 countries</strong> have backed the Plant-Rich Europe call to retailers. ProVeg has shared the toolkit in the Hub.
@@ -69,10 +69,10 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 14, marginBottom: 28 }}>
         {[
-          { num: String(CAMPAIGNS.length), label: 'Live campaigns this quarter', tint: '#2D6A4F' },
-          { num: '142', label: `Members across ${ORGS.length} orgs`, tint: '#40916C' },
-          { num: '23', label: 'New resources this week', tint: '#74C69D' },
-          { num: `${summitDays}d`, label: 'Until the Berlin Summit', tint: '#D4A373' },
+          { num: String(CAMPAIGNS.length), label: 'Live campaigns this quarter', tint: '#157A6E' },
+          { num: '142', label: `Members across ${ORGS.length} orgs`, tint: '#2E5EA8' },
+          { num: '23', label: 'New resources this week', tint: '#8A6310' },
+          { num: `${summitDays}d`, label: 'Until the Berlin Summit', tint: '#B4541E' },
         ].map((s, i) => (
           <Card key={i} padding="md" accent={s.tint}>
             <div className="myc-stat"><span className="myc-stat-num">{s.num}</span></div>
@@ -154,14 +154,23 @@ export function Dashboard({ onNav, onToast }: { onNav: (s: string) => void; onTo
   );
 }
 
+// When a stream filter is active and matches one of the item's streams, use that
+// stream as the visual accent — so "my stream" pops even when it's secondary.
+function pickAccentStream(streams: string[], activeFilter: string | null): string {
+  if (activeFilter && streams.includes(activeFilter)) return activeFilter;
+  return streams[0];
+}
+
 function FeedCard({ item, onNav, onToast }: { item: { kind: string; data: any; when: string }; onNav: (s: string) => void; onToast: (t: string) => void }) {
   const { kind, data, when } = item;
+  const { activeStreamFilter } = useAppContext();
 
   if (kind === 'campaign') {
     const org = orgById(data.org);
+    const accentColor = streamById(pickAccentStream(data.streams, activeStreamFilter)).color;
     return (
       <div className="myc-feed-item" onClick={() => onNav('calendar')} style={{ cursor: 'pointer' }}>
-        <div className="myc-feed-icon" style={{ background: streamById(data.streams[0]).color }}><Icon name="megaphone" size={18} /></div>
+        <div className="myc-feed-icon" style={{ background: accentColor }}><Icon name="megaphone" size={18} /></div>
         <div className="myc-feed-body">
           <div className="myc-feed-meta">
             <span>Campaign · {org.name}</span><span>·</span><span>{when}</span>
@@ -189,7 +198,7 @@ function FeedCard({ item, onNav, onToast }: { item: { kind: string; data: any; w
           <div className="myc-feed-title">{data.title}</div>
           <div className="myc-feed-snippet" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{data.content}</div>
           <div className="myc-feed-actions">
-            {data.streams.map((s: string) => <StreamBadge key={s} stream={s} />)}
+            {[...data.streams].sort((a: string, b: string) => (a === activeStreamFilter ? -1 : b === activeStreamFilter ? 1 : 0)).map((s: string) => <StreamBadge key={s} stream={s} />)}
             <span style={{ marginLeft: 'auto', fontSize: 11.5, color: 'var(--myc-text-2)' }}>{data.reactions.helpful} found this helpful · {data.comments} comments</span>
           </div>
         </div>
