@@ -86,14 +86,28 @@ const STREAMS_WITH_ICON = new Set<string>([
   'media', 'capacity', 'careers', 'law',
 ]);
 
-// Illustrated stream-icon tile. Renders /streams/<id>.png for streams that have
-// one shipped, otherwise a soft cream tile with the stream's coloured dot —
-// visually consistent with the real icons while the rest of the set is in flight.
+// Illustrated stream-icon tile. The real PNG icons now have transparent
+// backgrounds so they sit cleanly on whatever's behind them; the fallback
+// keeps the cream tile so any stream without an icon yet still reads as
+// a stream chip rather than an empty square.
 export function StreamIcon({ stream, size = 36 }: { stream: string; size?: number }) {
   const s = streamById(stream);
   if (!s) return null;
-  const radius = Math.max(4, Math.round(size * 0.22));
   const hasIcon = STREAMS_WITH_ICON.has(stream);
+  if (hasIcon) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={`/streams/${stream}.png`}
+        alt=""
+        style={{
+          width: size, height: size, objectFit: 'contain', display: 'block',
+          flexShrink: 0,
+        }}
+      />
+    );
+  }
+  const radius = Math.max(4, Math.round(size * 0.22));
   return (
     <div style={{
       width: size, height: size, borderRadius: radius,
@@ -102,22 +116,13 @@ export function StreamIcon({ stream, size = 36 }: { stream: string; size?: numbe
       overflow: 'hidden', flexShrink: 0,
       boxShadow: '0 1px 2px rgba(20, 35, 25, 0.06)',
     }}>
-      {hasIcon ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={`/streams/${stream}.png`}
-          alt=""
-          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-        />
-      ) : (
-        <span style={{
-          width: Math.round(size * 0.34),
-          height: Math.round(size * 0.34),
-          borderRadius: 999,
-          background: s.dot,
-          boxShadow: `0 0 0 ${Math.max(2, Math.round(size * 0.06))}px ${s.color}1F`,
-        }} />
-      )}
+      <span style={{
+        width: Math.round(size * 0.34),
+        height: Math.round(size * 0.34),
+        borderRadius: 999,
+        background: s.dot,
+        boxShadow: `0 0 0 ${Math.max(2, Math.round(size * 0.06))}px ${s.color}1F`,
+      }} />
     </div>
   );
 }
