@@ -1,32 +1,37 @@
 'use client';
 
 import { useState } from 'react';
-import { Icon, StreamBadge, Avatar, OrgLogo, Card, Button, ScreenHeader, MyceliumPattern, NetworkGraph } from '@/components/ui';
-import { PEOPLE, ORGS, STREAMS, CURRENT_USER, orgById, streamById, type Person } from '@/lib/data';
+import { Icon, StreamBadge, StreamFilterBar, Avatar, Card, Button, ScreenHeader, MyceliumPattern, NetworkGraph } from '@/components/ui';
+import { PEOPLE, ORGS, CURRENT_USER, orgById, streamById, matchesStreams, type Person } from '@/lib/data';
+import { useAppContext } from '@/components/app-shell';
 
 export function Directory({ onToast }: { onToast: (t: string) => void }) {
-  const [view, setView] = useState('network');
+  const { activeStreams, toggleStreamFilter, clearStreamFilter } = useAppContext();
+  const [view, setView] = useState('grid');
   const [search, setSearch] = useState('');
-  const [streamFilter, setStreamFilter] = useState('all');
   const [selected, setSelected] = useState<Person | null>(null);
 
   const filteredPeople = PEOPLE.filter(p =>
-    (streamFilter === 'all' || p.streams.includes(streamFilter)) &&
+    matchesStreams(p.streams, activeStreams) &&
     (search === '' || p.name.toLowerCase().includes(search.toLowerCase()) || orgById(p.org).name.toLowerCase().includes(search.toLowerCase()))
   );
+  const filteredOrgs = ORGS.filter(o => matchesStreams(o.streams, activeStreams));
+  const single = activeStreams.length === 1 ? streamById(activeStreams[0]) : null;
+  const scopeLabel = single ? ` working on ${single.label}` : activeStreams.length > 1 ? ` across ${activeStreams.length} streams` : ' in 14 countries';
 
   return (
-    <div className="myc-main-inner" style={{ paddingTop: 20 }}>
+    <div className="myc-main-inner" style={{ paddingTop: 6 }}>
       <ScreenHeader eyebrow="Member Directory" title="The network"
-        subtitle={`142 people across ${ORGS.length} organizations in 14 countries. Connections are formed through shared streams, co-authored learnings, and campaign collaborations.`}
+        subtitle={`142 people across ${ORGS.length} organisations${scopeLabel}. Connections form through shared streams, co-authored learnings, and campaign collaborations.`}
         actions={
-          <div style={{ display: 'flex', gap: 2, background: 'var(--myc-surface-2)', padding: 3, borderRadius: 7 }}>
-            {[{ id: 'network', label: 'Network' }, { id: 'grid', label: 'People' }, { id: 'orgs', label: 'Orgs' }].map(v => (
-              <button key={v.id} onClick={() => setView(v.id)} style={{ padding: '6px 12px', borderRadius: 5, background: view === v.id ? '#fff' : 'transparent', border: 0, cursor: 'pointer', fontSize: 12.5, fontWeight: 500, fontFamily: 'inherit', color: view === v.id ? 'var(--myc-primary)' : 'var(--myc-text-2)' }}>{v.label}</button>
+          <div className="myc-seg">
+            {[{ id: 'grid', label: 'People' }, { id: 'orgs', label: 'Orgs' }, { id: 'network', label: 'Network' }].map(v => (
+              <button key={v.id} onClick={() => setView(v.id)} className={view === v.id ? 'is-active' : ''}>{v.label}</button>
             ))}
           </div>
         }
       />
+      {view !== 'network' && <StreamFilterBar active={activeStreams} onToggle={toggleStreamFilter} onClear={clearStreamFilter} />}
 
       {view === 'network' && (
         <Card padding="lg" style={{ position: 'relative', overflow: 'hidden', height: 540, padding: 0 }}>
@@ -50,58 +55,50 @@ export function Directory({ onToast }: { onToast: (t: string) => void }) {
 
       {view === 'grid' && (
         <>
-          <div style={{ display: 'flex', gap: 14, marginBottom: 14 }}>
+          <div style={{ display: 'flex', gap: 14, marginBottom: 16 }}>
             <div style={{ flex: 1, position: 'relative' }}>
               <Icon name="search" size={15} style={{ position: 'absolute', left: 12, top: 11, color: 'var(--myc-text-3)' }} />
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search people or organizations…"
-                style={{ width: '100%', padding: '9px 12px 9px 36px', border: '1px solid var(--myc-border)', borderRadius: 8, fontSize: 13.5, fontFamily: 'inherit', background: 'var(--myc-surface)', outline: 'none' }} />
+              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search people or organisations…"
+                style={{ width: '100%', padding: '9px 12px 9px 36px', border: '1px solid var(--myc-border)', borderRadius: 10, fontSize: 13.5, fontFamily: 'inherit', background: 'var(--myc-surface)', outline: 'none' }} />
             </div>
           </div>
-          <div className="myc-pill-row">
-            <button className={`myc-pill ${streamFilter === 'all' ? 'is-active' : ''}`} onClick={() => setStreamFilter('all')}>All streams</button>
-            {STREAMS.map(s => (
-              <button key={s.id} className={`myc-pill ${streamFilter === s.id ? 'is-active' : ''}`} onClick={() => setStreamFilter(s.id)}>
-                <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 999, background: s.dot, marginRight: 6, transform: 'translateY(-1px)' }} />
-                {s.short}
-              </button>
-            ))}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-            {filteredPeople.map(p => (
-              <Card key={p.id} padding="md" onClick={() => setSelected(p)}>
-                <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
-                  <Avatar person={p} size={44} />
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--myc-text)' }}>{p.name}</div>
-                    <div style={{ fontSize: 12, color: 'var(--myc-text-2)', marginTop: 2 }}>{p.role}</div>
-                    <div style={{ fontSize: 12, color: 'var(--myc-text-2)', marginTop: 2 }}>{orgById(p.org).name} · {p.country}</div>
+          <div className="myc-grid-3">
+            {filteredPeople.length === 0 && <div className="myc-empty">No members in this stream yet — try another aisle.</div>}
+            {filteredPeople.map(p => {
+              const accent = streamById(p.streams[0]).color;
+              return (
+                <div key={p.id} className="myc-person" onClick={() => setSelected(p)}>
+                  <div className="myc-post-av" style={{ background: accent, width: 46, height: 46, fontSize: 15, marginBottom: 12 }}>
+                    {p.name.split(' ').map(w => w[0]).slice(0, 2).join('')}
                   </div>
+                  <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: -0.2, display: 'flex', alignItems: 'center', gap: 7 }}>
+                    {p.name}
+                    {p.title !== 'Member' && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: 0.5, textTransform: 'uppercase', color: 'var(--myc-text-3)', fontWeight: 500 }}>★ Lead</span>}
+                  </div>
+                  <div style={{ fontSize: 12.5, color: 'var(--myc-text-2)', marginTop: 3 }}>{p.role}</div>
+                  <div style={{ fontSize: 11.5, color: 'var(--myc-text-3)', marginTop: 1 }}>{orgById(p.org).name} · {p.country}</div>
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 13 }}>{p.streams.map(s => <StreamBadge key={s} stream={s} />)}</div>
                 </div>
-                {p.title !== 'Member' && <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--myc-warm-deep)', marginBottom: 8, letterSpacing: 0.3 }}>★ {p.title}</div>}
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>{p.streams.map(s => <StreamBadge key={s} stream={s} />)}</div>
-              </Card>
-            ))}
+              );
+            })}
           </div>
         </>
       )}
 
       {view === 'orgs' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-          {ORGS.map(o => (
-            <Card key={o.id} padding="md" accent={o.tint}>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginBottom: 12 }}>
-                <OrgLogo org={o} size={40} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 14.5, fontWeight: 600, color: 'var(--myc-text)' }}>{o.name}</div>
-                  <div style={{ fontSize: 12, color: 'var(--myc-text-2)', marginTop: 2 }}>{o.country}</div>
-                </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 12 }}>
+          {filteredOrgs.length === 0 && <div className="myc-empty">No organisations in this stream yet — try another aisle.</div>}
+          {filteredOrgs.map(o => (
+            <div key={o.id} className="myc-org">
+              <div className="myc-org-logo">{o.logo}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, letterSpacing: -0.2 }}>{o.name}</div>
+                <div style={{ fontSize: 11.5, color: 'var(--myc-text-3)', marginTop: 2 }}>{o.country} · {o.members} members</div>
               </div>
-              <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>{o.streams.map(s => <StreamBadge key={s} stream={s} />)}</div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 12, color: 'var(--myc-text-2)', borderTop: '1px solid var(--myc-border-soft)', paddingTop: 12 }}>
-                <span>{o.members} members on Mycelium</span>
-                <span className="myc-link" style={{ cursor: 'pointer' }}>View →</span>
+              <div style={{ display: 'flex', gap: 6, marginLeft: 'auto', flexWrap: 'wrap', justifyContent: 'flex-end', maxWidth: 180 }}>
+                {o.streams.map(s => <StreamBadge key={s} stream={s} />)}
               </div>
-            </Card>
+            </div>
           ))}
         </div>
       )}

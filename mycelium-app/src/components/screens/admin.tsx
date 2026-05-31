@@ -83,9 +83,9 @@ function AdminUsers({ onToast }: { onToast: (t: string) => void }) {
 function AdminContent({ onToast }: { onToast: (t: string) => void }) {
   return (
     <div>
-      <Card padding="lg" style={{ marginBottom: 22, background: 'linear-gradient(135deg, #F0F4F1 0%, #FAFAF8 100%)' }}>
+      <Card padding="lg" style={{ marginBottom: 22, background: 'linear-gradient(135deg, var(--myc-surface-2) 0%, var(--myc-surface) 100%)' }}>
         <div style={{ display: 'flex', gap: 18, alignItems: 'flex-start' }}>
-          <div style={{ width: 44, height: 44, borderRadius: 10, background: 'var(--myc-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 10, background: 'var(--myc-primary)', color: '#F4EEDF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <Icon name="sparkles" size={20} />
           </div>
           <div style={{ flex: 1 }}>

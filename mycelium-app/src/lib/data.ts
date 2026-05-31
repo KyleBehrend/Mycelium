@@ -4,8 +4,9 @@ export type Stream = {
   id: string;
   label: string;
   short: string;
-  color: string;
-  dot: string;
+  color: string;   // accent (--ac) — derived from the stream's clay icon
+  dot: string;     // pip colour (matches the accent in the Stream Shop system)
+  tagline: string; // one-line description shown on the Dashboard hero
 };
 
 export type Org = {
@@ -93,21 +94,23 @@ export type UpcomingTask = {
   stream: string;
 };
 
+// Accent colours are derived from each stream's 3D clay icon, so chips, hero
+// washes, stat numbers and active rings all read off the one --ac value.
 export const STREAMS: Stream[] = [
-  { id: 'public-health', label: 'Public Health', short: 'Health', color: '#157A6E', dot: '#4FB3A4' },
-  { id: 'research', label: 'Research & Academia', short: 'Research', color: '#6A4C93', dot: '#9F86C0' },
-  { id: 'policy', label: 'Policy Change', short: 'Policy', color: '#2E5EA8', dot: '#6E92D0' },
-  { id: 'corporate', label: 'Corporate & Industry', short: 'Corporate', color: '#6E4A2A', dot: '#A87C54' },
-  { id: 'culinary', label: 'Culinary Training', short: 'Culinary', color: '#B4541E', dot: '#E08A4C' },
-  { id: 'farm', label: 'Farm Adaptation', short: 'Farm', color: '#3E6B3A', dot: '#79A86A' },
-  { id: 'retail', label: 'Retailer Engagement', short: 'Retail', color: '#8A6310', dot: '#C99A2E' },
-  { id: 'consumer', label: 'Consumer Engagement', short: 'Consumer', color: '#B03E78', dot: '#E07AAE' },
-  { id: 'public-food', label: 'Public Food', short: 'Public Food', color: '#1B7A55', dot: '#54C49A' },
-  { id: 'universities', label: 'Universities', short: 'Universities', color: '#3F4E8F', dot: '#7E8BCB' },
-  { id: 'media', label: 'Media & Film', short: 'Media', color: '#B23636', dot: '#E07373' },
-  { id: 'capacity', label: 'Capacity Building', short: 'Capacity', color: '#1C6E8C', dot: '#5BAFC9' },
-  { id: 'careers', label: 'Careers & Talent', short: 'Careers', color: '#8E3A86', dot: '#C46FBC' },
-  { id: 'law', label: 'Law & Litigation', short: 'Law', color: '#3E4651', dot: '#7C8893' },
+  { id: 'public-health', label: 'Public Health', short: 'Health', color: '#C2674E', dot: '#C2674E', tagline: 'Diet, nutrition and dietary guidelines — the clinical case for plant-rich eating.' },
+  { id: 'research', label: 'Research & Academia', short: 'Research', color: '#3F4E8F', dot: '#3F4E8F', tagline: 'Alt-protein science and food-systems research building the evidence base.' },
+  { id: 'policy', label: 'Policy Change', short: 'Policy', color: '#5E7A4E', dot: '#5E7A4E', tagline: 'EU and national food policy, advocacy and the legislative agenda.' },
+  { id: 'corporate', label: 'Corporate & Industry', short: 'Corporate', color: '#A85A30', dot: '#A85A30', tagline: 'Food manufacturers and the supply chain reformulating toward plants.' },
+  { id: 'culinary', label: 'Culinary Training', short: 'Culinary', color: '#D2772E', dot: '#D2772E', tagline: 'Chefs and culinary schools making plant-forward cooking the default craft.' },
+  { id: 'farm', label: 'Farm Adaptation', short: 'Farm', color: '#3E6B3A', dot: '#3E6B3A', tagline: 'Crop diversification and regenerative transition for growers.' },
+  { id: 'retail', label: 'Retailer Engagement', short: 'Retail', color: '#6E7A42', dot: '#6E7A42', tagline: 'Supermarkets and grocery: shifting the plant-to-animal sales ratio on the shelf.' },
+  { id: 'consumer', label: 'Consumer Engagement', short: 'Consumer', color: '#C9622E', dot: '#C9622E', tagline: 'Behaviour-change campaigns that move the public from intention to plate.' },
+  { id: 'public-food', label: 'Public Food', short: 'Public Food', color: '#2E6E6A', dot: '#2E6E6A', tagline: 'Schools, hospitals and procurement — defaulting institutions to plant-rich menus.' },
+  { id: 'universities', label: 'Universities', short: 'Universities', color: '#4F6A99', dot: '#4F6A99', tagline: 'Campus food and the student movement building the next generation of advocates.' },
+  { id: 'media', label: 'Media & Film', short: 'Media', color: '#B23636', dot: '#B23636', tagline: 'Documentary, journalism and storytelling that reframes the food conversation.' },
+  { id: 'capacity', label: 'Capacity Building', short: 'Capacity', color: '#4E7A52', dot: '#4E7A52', tagline: 'Nonprofit strategy and the movement infrastructure that holds it together.' },
+  { id: 'careers', label: 'Careers & Talent', short: 'Careers', color: '#8E3A86', dot: '#8E3A86', tagline: 'Jobs, recruiting and the training pipelines that staff the movement.' },
+  { id: 'law', label: 'Law & Litigation', short: 'Law', color: '#3E4651', dot: '#3E4651', tagline: 'Food law and legal advocacy — pressure through the courts.' },
 ];
 
 export const streamById = (id: string): Stream => STREAMS.find(s => s.id === id) || STREAMS[0];
@@ -210,3 +213,26 @@ export const UPCOMING_TASKS: UpcomingTask[] = [
   { label: 'Brief MEPs on the EU plant-based labelling deal', due: 'Due Jun 12', stream: 'policy' },
   { label: 'Share ProVeg Incubator before applications close Jun 21', due: 'Due Jun 18', stream: 'careers' },
 ];
+
+// Stream-filter matching for the multi-select "shop by stream" model.
+// An empty selection means "all streams" (no filter). Otherwise an item shows
+// if any of its streams is in the active selection.
+export const matchesStreams = (itemStreams: string[], active: string[]): boolean =>
+  active.length === 0 || itemStreams.some(s => active.includes(s));
+export const matchesStream = (stream: string, active: string[]): boolean =>
+  active.length === 0 || active.includes(stream);
+
+// Real activity count per stream — campaigns + resources + learnings + posts +
+// people that touch the stream. Drives the sidebar row counts, the "browse all
+// 14 streams" tiles, and the hero stats so the numbers reflect actual content.
+export function streamActivityCount(id: string): number {
+  const inStreams = (arr: { streams: string[] }[]) => arr.filter(x => x.streams.includes(id)).length;
+  const inStream = (arr: { stream: string }[]) => arr.filter(x => x.stream === id).length;
+  return (
+    inStreams(CAMPAIGNS) +
+    inStream(KNOWLEDGE_DOCS) +
+    inStreams(LEARNINGS) +
+    inStreams(SOCIAL_POSTS) +
+    inStreams(PEOPLE)
+  );
+}

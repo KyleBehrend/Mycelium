@@ -1,26 +1,29 @@
 'use client';
 
 import { useState } from 'react';
-import { Icon, StreamBadge, OrgLogo, Card, Button, ScreenHeader } from '@/components/ui';
-import { CAMPAIGNS, STREAMS, orgById, streamById, type Campaign } from '@/lib/data';
+import { Icon, StreamBadge, StreamIcon, StreamFilterBar, OrgLogo, Card, Button, ScreenHeader } from '@/components/ui';
+import { CAMPAIGNS, orgById, streamById, matchesStreams, type Campaign } from '@/lib/data';
+import { useAppContext } from '@/components/app-shell';
 
 export function CampaignCalendar({ onToast }: { onToast: (t: string) => void }) {
+  const { activeStreams, toggleStreamFilter, clearStreamFilter } = useAppContext();
   const [view, setView] = useState('month');
-  const [filter, setFilter] = useState('all');
   const [selected, setSelected] = useState<Campaign | null>(null);
   const [showSubmit, setShowSubmit] = useState(false);
   const now = new Date();
   const [calMonth, setCalMonth] = useState(5); // June (0-indexed)
   const [calYear, setCalYear] = useState(2026);
 
-  const filtered = CAMPAIGNS.filter(c => filter === 'all' || c.streams.includes(filter));
+  const filtered = CAMPAIGNS.filter(c => matchesStreams(c.streams, activeStreams));
+  const single = activeStreams.length === 1 ? streamById(activeStreams[0]) : null;
+  const scopeLabel = single ? `, filtered to ${single.label}` : activeStreams.length > 1 ? `, across ${activeStreams.length} streams` : '';
 
   return (
-    <div className="myc-main-inner" style={{ paddingTop: 20 }}>
+    <div className="myc-main-inner" style={{ paddingTop: 6 }}>
       <ScreenHeader
         eyebrow="Campaign Calendar"
-        title="What the movement is doing this quarter"
-        subtitle="See key campaign moments, policy windows, and calls to action across the network. Mark which ones you'll support — your engagement helps coordinate amplification."
+        title="What the movement is doing"
+        subtitle={`Every coordinated moment across the network${scopeLabel}. Mark which ones you'll support — your engagement helps coordinate amplification.`}
         actions={
           <>
             <Button variant="secondary" icon="filter" onClick={() => onToast('Calendar .ics link copied to clipboard.')}>Subscribe to .ics</Button>
@@ -28,18 +31,10 @@ export function CampaignCalendar({ onToast }: { onToast: (t: string) => void }) 
           </>
         }
       />
-      <div className="myc-pill-row">
-        <button className={`myc-pill ${filter === 'all' ? 'is-active' : ''}`} onClick={() => setFilter('all')}>All streams</button>
-        {STREAMS.map(s => (
-          <button key={s.id} className={`myc-pill ${filter === s.id ? 'is-active' : ''}`} onClick={() => setFilter(s.id)}>
-            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 999, background: s.dot, marginRight: 6, transform: 'translateY(-1px)' }} />
-            {s.short}
-          </button>
-        ))}
-      </div>
-      <div style={{ display: 'flex', gap: 6, marginBottom: 16, background: 'var(--myc-surface-2)', padding: 3, borderRadius: 8, width: 'fit-content' }}>
+      <StreamFilterBar active={activeStreams} onToggle={toggleStreamFilter} onClear={clearStreamFilter} />
+      <div className="myc-seg" style={{ marginBottom: 16 }}>
         {['month', 'list'].map(v => (
-          <button key={v} onClick={() => setView(v)} style={{ padding: '6px 14px', borderRadius: 6, background: view === v ? '#fff' : 'transparent', border: 0, cursor: 'pointer', fontSize: 12.5, fontWeight: 500, fontFamily: 'inherit', color: view === v ? 'var(--myc-primary)' : 'var(--myc-text-2)' }}>{v === 'month' ? 'Month' : 'List'}</button>
+          <button key={v} onClick={() => setView(v)} className={view === v ? 'is-active' : ''}>{v === 'month' ? 'Month' : 'List'}</button>
         ))}
       </div>
       {view === 'month' ? <CalendarMonth campaigns={filtered} onSelect={setSelected} month={calMonth} year={calYear} onPrev={() => { if (calMonth === 0) { setCalMonth(11); setCalYear(y => y - 1); } else { setCalMonth(m => m - 1); } }} onNext={() => { if (calMonth === 11) { setCalMonth(0); setCalYear(y => y + 1); } else { setCalMonth(m => m + 1); } }} onToday={() => { setCalMonth(now.getMonth()); setCalYear(now.getFullYear()); }} /> : <CalendarList campaigns={filtered} onSelect={setSelected} />}
@@ -88,6 +83,11 @@ function CalendarMonth({ campaigns, onSelect, month, year, onPrev, onNext, onTod
     }
   });
   const eventsForDay = (day: number) => eventsByDay.get(day) || [];
+  // Upcoming rail — campaigns kicking off this month, earliest first.
+  const upcoming = [...eventsByDay.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .flatMap(([, arr]) => arr)
+    .slice(0, 7);
 
   return (
     <div>
@@ -107,8 +107,8 @@ function CalendarMonth({ campaigns, onSelect, month, year, onPrev, onNext, onTod
               const s = streamById(c.streams[0]);
               return (
                 <button key={c.id} className="myc-cal-ongoing-chip" onClick={() => onSelect(c)}
-                  style={{ background: `${s.color}14`, color: s.color, borderColor: `${s.color}33` }}>
-                  <span style={{ width: 6, height: 6, borderRadius: 999, background: s.dot, display: 'inline-block', flexShrink: 0 }} />
+                  style={{ ['--ac' as string]: s.color } as React.CSSProperties}>
+                  <StreamIcon stream={s.id} size={22} />
                   {c.title}
                 </button>
               );
@@ -116,27 +116,48 @@ function CalendarMonth({ campaigns, onSelect, month, year, onPrev, onNext, onTod
           </div>
         </div>
       )}
-      <div className="myc-cal-grid">
-        {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <div key={d} className="myc-cal-head">{d}</div>)}
-        {cells.map((c, i) => {
-          const events = c.kind === 'cur' ? eventsForDay(c.day) : [];
-          const isToday = c.kind === 'cur' && c.day === todayDay;
-          return (
-            <div key={i} className={`myc-cal-cell ${c.kind !== 'cur' ? 'is-out' : ''} ${isToday ? 'is-today' : ''}`}>
-              <div className={`myc-cal-day ${c.kind !== 'cur' ? 'myc-cal-out' : ''}`}>{isToday ? <span>{c.day}</span> : c.day}</div>
-              {events.slice(0, 3).map((e, j) => {
-                const s = streamById(e.streams[0]);
-                return (
-                  <div key={j} className="myc-cal-event" onClick={() => onSelect(e)}
-                    style={{ background: s.color + '18', color: s.color, fontWeight: 500 }}>
-                    {e.title}
-                  </div>
-                );
-              })}
-              {events.length > 3 && <div style={{ fontSize: 10.5, color: 'var(--myc-text-2)', marginTop: 2 }}>+{events.length - 3} more</div>}
-            </div>
-          );
-        })}
+      <div className="myc-cal-wrap">
+        <div className="myc-cal-grid">
+          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <div key={d} className="myc-cal-head">{d}</div>)}
+          {cells.map((c, i) => {
+            const events = c.kind === 'cur' ? eventsForDay(c.day) : [];
+            const isToday = c.kind === 'cur' && c.day === todayDay;
+            return (
+              <div key={i} className={`myc-cal-cell ${c.kind !== 'cur' ? 'is-out' : ''} ${isToday ? 'is-today' : ''}`}>
+                <div className={`myc-cal-day ${c.kind !== 'cur' ? 'myc-cal-out' : ''}`}>{isToday ? <span>{c.day}</span> : c.day}</div>
+                {events.slice(0, 3).map((e, j) => {
+                  const s = streamById(e.streams[0]);
+                  return (
+                    <div key={j} className="myc-cal-event" onClick={() => onSelect(e)}
+                      style={{ ['--ac' as string]: s.color } as React.CSSProperties}>
+                      <StreamIcon stream={s.id} size={15} />
+                      <span>{e.title}</span>
+                    </div>
+                  );
+                })}
+                {events.length > 3 && <div style={{ fontSize: 10.5, color: 'var(--myc-text-3)', marginTop: 2 }}>+{events.length - 3} more</div>}
+              </div>
+            );
+          })}
+        </div>
+        <div className="myc-cal-side">
+          <div className="myc-cal-side-h">Upcoming</div>
+          {upcoming.length === 0 && <div style={{ fontSize: 12.5, color: 'var(--myc-text-3)' }}>Nothing kicking off this month.</div>}
+          {upcoming.map(c => {
+            const s = streamById(c.streams[0]);
+            const start = parseDate(c.start);
+            return (
+              <button key={c.id} className="myc-up" onClick={() => onSelect(c)}
+                style={{ background: 'transparent', border: 0, borderTopWidth: 1, width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}>
+                <StreamIcon stream={s.id} size={34} />
+                <div>
+                  <div className="myc-up-ti">{c.title}</div>
+                  <div className="myc-up-dt">{start.toLocaleDateString('en', { month: 'short', day: 'numeric' })} · {s.label}</div>
+                </div>
+              </button>
+            );
+          })}
+        </div>
       </div>
     </div>
   );

@@ -39,6 +39,7 @@ export function Settings({ onToast }: { onToast: (t: string) => void }) {
               {STREAMS.map(s => (
                 <div key={s.id}
                   className={`myc-stream-card ${userStreams.includes(s.id) ? 'is-selected' : ''}`}
+                  style={{ ['--ac' as string]: s.color } as React.CSSProperties}
                   onClick={() => {
                     toggleStream(s.id);
                     onToast(userStreams.includes(s.id) ? `Removed ${s.short} from your streams.` : `Added ${s.short} to your streams.`);

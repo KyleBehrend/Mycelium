@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { Icon, StreamBadge, Avatar, Card, Button, ScreenHeader, MyceliumMark } from '@/components/ui';
-import { CURRENT_USER, STREAMS, KNOWLEDGE_DOCS, LEARNING_FEED, streamById } from '@/lib/data';
+import { Icon, StreamBadge, StreamIcon, StreamFilterBar, Avatar, Card, Button, ScreenHeader, MyceliumMark } from '@/components/ui';
+import { CURRENT_USER, KNOWLEDGE_DOCS, LEARNING_FEED, streamById, matchesStream } from '@/lib/data';
+import { useAppContext } from '@/components/app-shell';
 
 export function KnowledgeHub({ onToast }: { onToast: (t: string) => void }) {
   const [tab, setTab] = useState('chat');
@@ -229,78 +230,47 @@ function ChatMessage({ message }: { message: ChatMsg }) {
 }
 
 function LibraryPanel({ onToast }: { onToast: (t: string) => void }) {
-  const [view, setView] = useState('grid');
-  const [filter, setFilter] = useState('all');
+  const { activeStreams, toggleStreamFilter, clearStreamFilter } = useAppContext();
   const [search, setSearch] = useState('');
 
   const filtered = KNOWLEDGE_DOCS.filter(d =>
-    (filter === 'all' || d.stream === filter) &&
+    matchesStream(d.stream, activeStreams) &&
     (search === '' || d.title.toLowerCase().includes(search.toLowerCase()) || d.source.toLowerCase().includes(search.toLowerCase()))
   );
 
   return (
     <div>
-      <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 14 }}>
+      <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 6 }}>
         <div style={{ flex: 1, position: 'relative' }}>
           <Icon name="search" size={15} style={{ position: 'absolute', left: 12, top: 11, color: 'var(--myc-text-3)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search 1,247 resources…"
-            style={{ width: '100%', padding: '9px 12px 9px 36px', border: '1px solid var(--myc-border)', borderRadius: 8, fontSize: 13.5, fontFamily: 'inherit', background: 'var(--myc-surface)', outline: 'none' }} />
-        </div>
-        <div style={{ display: 'flex', gap: 1, background: 'var(--myc-surface-2)', padding: 2, borderRadius: 7 }}>
-          <button onClick={() => setView('grid')} style={{ padding: '6px 8px', background: view === 'grid' ? '#fff' : 'transparent', border: 0, borderRadius: 5, cursor: 'pointer', color: view === 'grid' ? 'var(--myc-primary)' : 'var(--myc-text-2)' }}><Icon name="grid" size={14} /></button>
-          <button onClick={() => setView('list')} style={{ padding: '6px 8px', background: view === 'list' ? '#fff' : 'transparent', border: 0, borderRadius: 5, cursor: 'pointer', color: view === 'list' ? 'var(--myc-primary)' : 'var(--myc-text-2)' }}><Icon name="list" size={14} /></button>
+            style={{ width: '100%', padding: '9px 12px 9px 36px', border: '1px solid var(--myc-border)', borderRadius: 10, fontSize: 13.5, fontFamily: 'inherit', background: 'var(--myc-surface)', outline: 'none' }} />
         </div>
         <Button variant="primary" icon="plus" onClick={() => onToast('Upload coming next — chunk & embed pipeline ready.')}>Upload</Button>
       </div>
-      <div className="myc-pill-row">
-        <button className={`myc-pill ${filter === 'all' ? 'is-active' : ''}`} onClick={() => setFilter('all')}>All streams</button>
-        {STREAMS.map(s => (
-          <button key={s.id} className={`myc-pill ${filter === s.id ? 'is-active' : ''}`} onClick={() => setFilter(s.id)}>
-            <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: 999, background: s.dot, marginRight: 6, transform: 'translateY(-1px)' }} />
-            {s.short}
-          </button>
-        ))}
-      </div>
-      {view === 'grid' ? (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
-          {filtered.map(d => {
+      <StreamFilterBar active={activeStreams} onToggle={toggleStreamFilter} onClear={clearStreamFilter} />
+      <div className="myc-res-grid">
+        {filtered.length === 0
+          ? <div className="myc-empty">Nothing in this stream yet — try another aisle.</div>
+          : filtered.map(d => {
             const s = streamById(d.stream);
             return (
-              <Card key={d.id} padding="md" accent={s.color} style={{ cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: 10, minHeight: 180 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase', color: 'var(--myc-text-2)' }}>{d.type.replace(/_/g, ' ')}</div>
-                  <button onClick={(e) => { e.stopPropagation(); onToast('Saved to bookmarks.'); }} style={{ background: 'transparent', border: 0, padding: 4, cursor: 'pointer', color: 'var(--myc-text-3)' }}>
-                    <Icon name="bookmark" size={14} />
-                  </button>
+              <div key={d.id} className="myc-res" style={{ ['--ac' as string]: s.color } as React.CSSProperties}
+                onClick={() => onToast(`Opening "${d.title}"`)}>
+                <div className="myc-res-top">
+                  <StreamIcon stream={d.stream} size={54} />
+                  <span className="myc-res-type">{d.type.replace(/_/g, ' ')}</span>
                 </div>
-                <div style={{ fontSize: 14.5, fontWeight: 600, lineHeight: 1.35, color: 'var(--myc-text)', textWrap: 'pretty', flex: 1 }}>{d.title}</div>
-                <div style={{ fontSize: 12, color: 'var(--myc-text-2)' }}>{d.source}</div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+                <div className="myc-res-ti">{d.title}</div>
+                <div className="myc-res-meta">{d.source} · {d.updated} · {d.size}</div>
+                <div className="myc-res-ft">
                   <StreamBadge stream={d.stream} />
-                  <span style={{ marginLeft: 'auto', fontSize: 11.5, color: 'var(--myc-text-2)' }}>{d.size} · {d.downloads} ↓</span>
+                  <span className="myc-res-dl">↓ {d.downloads}</span>
                 </div>
-              </Card>
+              </div>
             );
           })}
-        </div>
-      ) : (
-        <Card padding="md" style={{ padding: 0 }}>
-          {filtered.map((d, i) => (
-            <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderBottom: i === filtered.length - 1 ? 'none' : '1px solid var(--myc-border-soft)' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 7, background: streamById(d.stream).color + '18', color: streamById(d.stream).color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <Icon name="book" size={16} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 13.5, fontWeight: 600 }}>{d.title}</div>
-                <div style={{ fontSize: 11.5, color: 'var(--myc-text-2)', marginTop: 2 }}>{d.source} · {d.updated} · {d.size}</div>
-              </div>
-              <StreamBadge stream={d.stream} />
-              <span style={{ fontSize: 11.5, color: 'var(--myc-text-2)', minWidth: 80, textAlign: 'right' }}>{d.downloads} downloads</span>
-              <Button variant="ghost" size="sm" icon="download" onClick={() => onToast(`Downloaded "${d.title}"`)} />
-            </div>
-          ))}
-        </Card>
-      )}
+      </div>
     </div>
   );
 }
@@ -321,12 +291,10 @@ function LearningFeedPanel() {
       <div className="myc-grid-feed">
         {LEARNING_FEED.map(item => (
           <div key={item.id} className="myc-feed-item">
-            <div className="myc-feed-icon" style={{ background: 'linear-gradient(135deg, #5E548E, #9F86C0)' }}>
-              <Icon name="sparkles" size={18} />
-            </div>
+            <StreamIcon stream={item.stream} size={54} />
             <div className="myc-feed-body">
               <div className="myc-feed-meta">
-                <span style={{ color: 'var(--myc-primary)', fontWeight: 600 }}>AI summary</span><span>·</span><span>{item.source} · {item.when}</span>
+                <span style={{ color: 'var(--myc-accent)', fontWeight: 600 }}>AI summary</span><span>·</span><span>{item.source} · {item.when}</span>
               </div>
               <div className="myc-feed-title">{item.title}</div>
               <div className="myc-feed-snippet">{item.summary}</div>

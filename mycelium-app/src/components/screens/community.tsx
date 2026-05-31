@@ -1,32 +1,43 @@
 'use client';
 
 import { useState } from 'react';
-import { Icon, StreamBadge, Avatar, Card, Button, ScreenHeader } from '@/components/ui';
-import { SOCIAL_POSTS, LEARNINGS, orgById, personById } from '@/lib/data';
+import { Icon, StreamBadge, StreamFilterBar, Avatar, Card, Button, ScreenHeader } from '@/components/ui';
+import { CURRENT_USER, SOCIAL_POSTS, LEARNINGS, orgById, personById, matchesStreams } from '@/lib/data';
+import { useAppContext } from '@/components/app-shell';
 
 export function Community({ onToast }: { onToast: (t: string) => void }) {
+  const { activeStreams, toggleStreamFilter, clearStreamFilter } = useAppContext();
   const [tab, setTab] = useState('social');
   return (
-    <div className="myc-main-inner" style={{ paddingTop: 20 }}>
-      <ScreenHeader eyebrow="Community" title="Support each other's work"
-        subtitle="Amplify campaigns by engaging with each other's social posts. Share insights, wins, and lessons learned. The flywheel of the movement runs on this page."
+    <div className="myc-main-inner" style={{ paddingTop: 6 }}>
+      <ScreenHeader eyebrow="Community" title="Compare notes, share what worked"
+        subtitle="Where organisers amplify each other's campaigns, share wins and lessons, and ask the network for help. The flywheel of the movement runs on this page."
         actions={<Button variant="primary" icon="plus" onClick={() => {
           const el = document.getElementById('submit-post-form');
           if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); setTimeout(() => { const input = el.querySelector('input'); input?.focus(); }, 400); }
         }}>New post</Button>} />
+      <div className="myc-composer">
+        <div className="myc-post-av" style={{ background: CURRENT_USER.tint }}>{CURRENT_USER.name.split(' ').map(w => w[0]).slice(0, 2).join('')}</div>
+        <input placeholder="Share an update or ask the network something…" onFocus={() => onToast('Composer opens with the full editor (demo).')} />
+        <Button variant="primary" icon="send">Post</Button>
+      </div>
+      <StreamFilterBar active={activeStreams} onToggle={toggleStreamFilter} onClear={clearStreamFilter} />
       <div className="myc-tabs">
         <button className={`myc-tab ${tab === 'social' ? 'is-active' : ''}`} onClick={() => setTab('social')}>Social Engagement</button>
         <button className={`myc-tab ${tab === 'learnings' ? 'is-active' : ''}`} onClick={() => setTab('learnings')}>Learnings Board</button>
       </div>
-      {tab === 'social' ? <SocialHubPanel onToast={onToast} /> : <LearningsBoardPanel onToast={onToast} />}
+      {tab === 'social' ? <SocialHubPanel onToast={onToast} activeStreams={activeStreams} /> : <LearningsBoardPanel onToast={onToast} activeStreams={activeStreams} />}
     </div>
   );
 }
 
-function SocialHubPanel({ onToast }: { onToast: (t: string) => void }) {
+function SocialHubPanel({ onToast, activeStreams }: { onToast: (t: string) => void; activeStreams: string[] }) {
   const [engaged, setEngaged] = useState<Record<string, boolean>>({});
   const [platformFilter, setPlatformFilter] = useState<string>('all');
-  const filteredPosts = platformFilter === 'all' ? SOCIAL_POSTS : SOCIAL_POSTS.filter(p => p.platform === platformFilter);
+  const filteredPosts = SOCIAL_POSTS.filter(p =>
+    (platformFilter === 'all' || p.platform === platformFilter) &&
+    matchesStreams(p.streams, activeStreams)
+  );
   return (
     <div className="myc-grid-2">
       <div>
@@ -37,6 +48,7 @@ function SocialHubPanel({ onToast }: { onToast: (t: string) => void }) {
           <button className={`myc-pill ${platformFilter === 'instagram' ? 'is-active' : ''}`} onClick={() => setPlatformFilter('instagram')}>Instagram</button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {filteredPosts.length === 0 && <div className="myc-empty">Nothing in this stream yet — try another aisle.</div>}
           {filteredPosts.map(p => {
             const author = personById(p.user);
             const org = orgById(p.org);
@@ -114,18 +126,14 @@ function SocialHubPanel({ onToast }: { onToast: (t: string) => void }) {
   );
 }
 
-function LearningsBoardPanel({ onToast }: { onToast: (t: string) => void }) {
+function LearningsBoardPanel({ onToast, activeStreams }: { onToast: (t: string) => void; activeStreams: string[] }) {
   const [reacted, setReacted] = useState<Record<string, string>>({});
+  const learnings = LEARNINGS.filter(l => matchesStreams(l.streams, activeStreams));
   return (
     <div>
-      <div className="myc-pill-row">
-        <button className="myc-pill is-active">All learnings</button>
-        <button className="myc-pill">In your streams</button>
-        <button className="myc-pill">Most reacted</button>
-        <button className="myc-pill">Pinned by Track Leads</button>
-      </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-        {LEARNINGS.map(l => {
+        {learnings.length === 0 && <div className="myc-empty">Nothing in this stream yet — try another aisle.</div>}
+        {learnings.map(l => {
           const author = personById(l.author);
           const isReacted = reacted[l.id];
           return (

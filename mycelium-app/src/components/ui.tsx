@@ -7,7 +7,7 @@ import {
   Filter, MessageSquare, Command, ArrowRight, ExternalLink, Pin, Check, X,
   LayoutGrid, List,
 } from 'lucide-react';
-import { streamById, orgById as orgByIdFn, ORGS, PEOPLE, type Person, type Org, type Stream } from '@/lib/data';
+import { STREAMS, streamById, orgById as orgByIdFn, ORGS, PEOPLE, type Person, type Org, type Stream } from '@/lib/data';
 
 // Custom social media icons (not in lucide-react)
 function TwitterIcon({ size = 18, style, className }: { size?: number; strokeWidth?: number; style?: React.CSSProperties; className?: string }) {
@@ -39,24 +39,54 @@ export function Icon({ name, size = 18, strokeWidth = 1.6, style, className }: {
   return <Comp size={size} strokeWidth={strokeWidth} style={style} className={className} />;
 }
 
+// Stream chip — accent text on a 13%-accent wash with a matching pip, driven
+// off the one --ac value so chips always match the stream's clay icon.
 export function StreamBadge({ stream, size = 'sm', muted = false }: { stream: string; size?: 'sm' | 'lg'; muted?: boolean }) {
   const s = streamById(stream);
   if (!s) return null;
-  const padY = size === 'lg' ? 6 : 3;
-  const padX = size === 'lg' ? 12 : 8;
+  const padY = size === 'lg' ? 5 : 2;
+  const padX = size === 'lg' ? 11 : 8;
   const fontSize = size === 'lg' ? 12 : 11;
+  if (muted) {
+    return (
+      <span style={{
+        display: 'inline-flex', alignItems: 'center', gap: 5,
+        padding: `${padY}px ${padX}px`, borderRadius: 999,
+        background: 'transparent', color: 'var(--myc-text-2)',
+        border: '1px solid var(--myc-border)',
+        fontSize, fontWeight: 600, whiteSpace: 'nowrap',
+      }}>
+        <span style={{ width: 5, height: 5, borderRadius: 999, background: s.dot, display: 'inline-block' }} />
+        {s.short}
+      </span>
+    );
+  }
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 6,
-      padding: `${padY}px ${padX}px`, borderRadius: 999,
-      background: muted ? 'transparent' : `${s.color}14`,
-      color: muted ? 'var(--myc-text-2)' : s.color,
-      border: muted ? '1px solid var(--myc-border)' : 'none',
-      fontSize, fontWeight: 500, letterSpacing: 0.1, whiteSpace: 'nowrap',
-    }}>
-      <span style={{ width: 6, height: 6, borderRadius: 999, background: s.dot, display: 'inline-block' }} />
+    <span className="myc-chip" style={{ ['--ac' as string]: s.color, padding: `${padY}px ${padX}px`, fontSize } as React.CSSProperties}>
+      <span className="myc-chip-d" />
       {s.short}
     </span>
+  );
+}
+
+// The horizontal stream filter bar — the "shop aisles" shown on every content
+// page. Multi-select: toggle any number of streams; "All streams" clears the
+// selection. Driven by the caller's state so the filter persists across pages
+// (see AppShell's activeStreams). Empty selection = all streams.
+export function StreamFilterBar({ active, onToggle, onClear }: { active: string[]; onToggle: (id: string) => void; onClear: () => void }) {
+  return (
+    <div className="myc-filterbar">
+      <button className={`myc-fpill is-all ${active.length === 0 ? 'is-active' : ''}`} onClick={onClear}>All streams</button>
+      {STREAMS.map(s => (
+        <button key={s.id}
+          className={`myc-fpill ${active.includes(s.id) ? 'is-active' : ''}`}
+          style={{ ['--ac' as string]: s.color } as React.CSSProperties}
+          onClick={() => onToggle(s.id)}>
+          <StreamIcon stream={s.id} size={24} />
+          <span>{s.short}</span>
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -98,12 +128,10 @@ export function StreamIcon({ stream, size = 36 }: { stream: string; size?: numbe
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
+        className="myc-clay-ic"
         src={`/streams/${stream}.png`}
         alt=""
-        style={{
-          width: size, height: size, objectFit: 'contain', display: 'block',
-          flexShrink: 0,
-        }}
+        style={{ width: size, height: size }}
       />
     );
   }

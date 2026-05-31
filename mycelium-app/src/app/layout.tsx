@@ -1,15 +1,12 @@
 import type { Metadata } from "next";
-import { DM_Sans, Inter, JetBrains_Mono } from "next/font/google";
+import { DM_Sans, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-sans",
-  subsets: ["latin"],
-  display: "swap",
-});
-
+// The Stream Shop system uses DM Sans for everything (400–700) and
+// JetBrains Mono for eyebrows, labels, counts and badges. DM Sans is bound to
+// --font-sans (body) and re-used for --font-display (headings) in globals.css.
 const dmSans = DM_Sans({
-  variable: "--font-display",
+  variable: "--font-sans",
   subsets: ["latin"],
   display: "swap",
   weight: ["400", "500", "600", "700"],
@@ -33,7 +30,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${dmSans.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className={`${dmSans.variable} ${jetbrainsMono.variable}`}>
       <body>{children}</body>
     </html>
   );
