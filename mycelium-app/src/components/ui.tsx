@@ -78,9 +78,12 @@ export function Avatar({ person, size = 32, ring = false }: { person: Person; si
 }
 
 // Streams that have a real illustrated icon at /streams/<id>.png.
-// Add IDs here as Kyle ships each icon — others render the cream-tile fallback.
+// All 14 are now shipped — keeping the set so adding a new stream later
+// without an icon falls back gracefully to the cream tile.
 const STREAMS_WITH_ICON = new Set<string>([
-  'public-health',
+  'public-health', 'research', 'policy', 'corporate', 'culinary',
+  'farm', 'retail', 'consumer', 'public-food', 'universities',
+  'media', 'capacity', 'careers', 'law',
 ]);
 
 // Illustrated stream-icon tile. Renders /streams/<id>.png for streams that have

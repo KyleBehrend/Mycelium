@@ -38,7 +38,7 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
             <>
               <h1 className="myc-onb-h">Welcome to Mycelium.</h1>
               <p className="myc-onb-sub">
-                You&apos;ve been invited by <strong style={{ color: 'var(--myc-text)' }}>Marcus Halberg (Stray Dog Institute)</strong> to join the network of organizations working on the plant-based food system transition.
+                You&apos;ve been invited by <strong style={{ color: 'var(--myc-text)' }}>David and the Plant Food System Summit team</strong> to join the network of organizations gathering for the Summit in Berlin, 21–22 November 2026.
               </p>
               <div onClick={() => {}} style={{
                 position: 'relative', borderRadius: 14, overflow: 'hidden', marginBottom: 20,
