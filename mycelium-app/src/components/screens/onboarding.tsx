@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Icon, Button, MyceliumMark, MyceliumPattern, NetworkGraph, StreamIcon } from '@/components/ui';
+import { Icon, Button, MyceliumPattern, NetworkGraph, StreamIcon } from '@/components/ui';
 import { STREAMS } from '@/lib/data';
 
 export function Onboarding({ onComplete }: { onComplete: () => void }) {
@@ -24,7 +24,8 @@ export function Onboarding({ onComplete }: { onComplete: () => void }) {
     <div className="myc-onb-shell">
       <div className="myc-onb-left">
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 60 }}>
-          <MyceliumMark size={32} color="var(--myc-primary)" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Mycelium" style={{ width: 40, height: 40, objectFit: 'contain', flexShrink: 0 }} />
           <div>
             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 17, color: 'var(--myc-primary)' }}>Mycelium</div>
             <div style={{ fontSize: 10.5, color: 'var(--myc-text-2)', letterSpacing: 0.6, textTransform: 'uppercase' }}>Movement Infrastructure</div>

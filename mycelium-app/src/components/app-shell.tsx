@@ -1,7 +1,29 @@
 'use client';
 
 import { useState, useEffect, useCallback, createContext, useContext } from 'react';
-import { Icon, MyceliumMark, Avatar } from '@/components/ui';
+import { Icon, Avatar } from '@/components/ui';
+
+// Nav rows that have a custom illustrated PNG icon at /public/nav/<id>.png.
+// Anything not here falls back to the existing Lucide glyph.
+const NAV_ICON_PATH: Record<string, string> = {
+  dashboard: '/nav/dashboard.png',
+  knowledge: '/nav/knowledge.png',
+  signals:   '/nav/signals.png',
+  calendar:  '/nav/calendar.png',
+  community: '/nav/community.png',
+  directory: '/nav/directory.png',
+};
+
+function NavGlyph({ id, fallback }: { id: string; fallback: string }) {
+  const path = NAV_ICON_PATH[id];
+  if (path) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={path} alt="" style={{ width: 26, height: 26, objectFit: 'contain', flexShrink: 0 }} />
+    );
+  }
+  return <Icon name={fallback} size={17} />;
+}
 import { CURRENT_USER, STREAMS, streamById, orgById } from '@/lib/data';
 import { Dashboard } from '@/components/screens/dashboard';
 import { KnowledgeHub } from '@/components/screens/knowledge';
@@ -106,7 +128,8 @@ export function AppShell() {
       <div className="myc-app">
         <aside className="myc-sidebar">
           <div className="myc-brand" onClick={() => setScreen('dashboard')}>
-            <MyceliumMark size={28} color="var(--myc-primary)" />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Mycelium" style={{ width: 36, height: 36, objectFit: 'contain', flexShrink: 0 }} />
             <div>
               <div className="myc-brand-name">Mycelium</div>
               <div className="myc-brand-sub">Movement Infrastructure</div>
@@ -124,7 +147,7 @@ export function AppShell() {
               <button key={item.id}
                 className={`myc-nav-item ${screen === item.id ? 'is-active' : ''}`}
                 onClick={() => { setScreen(item.id); setActiveStreamFilter(null); }}>
-                <Icon name={item.icon} size={17} />
+                <NavGlyph id={item.id} fallback={item.icon} />
                 <span>{item.label}</span>
               </button>
             ))}
@@ -182,7 +205,7 @@ export function AppShell() {
               <button key={item.id}
                 className={`myc-nav-item ${screen === item.id ? 'is-active' : ''}`}
                 onClick={() => setScreen(item.id)}>
-                <Icon name={item.icon} size={17} />
+                <NavGlyph id={item.id} fallback={item.icon} />
                 <span>{item.label}</span>
               </button>
             ))}
