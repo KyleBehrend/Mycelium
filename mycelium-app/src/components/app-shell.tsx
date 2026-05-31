@@ -69,7 +69,11 @@ export function AppShell() {
   const [screen, setScreen] = useState<Screen>('dashboard');
   const [cmdkOpen, setCmdkOpen] = useState(false);
   const [toasts, setToasts] = useState<{ id: number; text: string; success?: boolean }[]>([]);
-  const [showOnboarding, setShowOnboarding] = useState(false);
+  // Demo behaviour: always open on the onboarding flow so anyone handed the link
+  // (or doing a hard refresh) lands there fresh. Completion just advances into
+  // the app for the session; a reload re-triggers it. (Persist a "seen" flag
+  // later when this graduates from a demo.)
+  const [showOnboarding, setShowOnboarding] = useState(true);
   const [userStreams, setUserStreams] = useState<string[]>(CURRENT_USER.streams);
   // Filter defaults to the member's followed streams so the hub opens focused on
   // what they care about; they can narrow to one stream or pick any multi-set.
@@ -103,19 +107,7 @@ export function AppShell() {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  // Auto-trigger the welcome flow on first visit. Re-runs only if the flag is
-  // cleared (e.g. via the "Take a tour" button below, which forces it back on).
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!window.localStorage.getItem('myc-onboarded')) {
-      setShowOnboarding(true);
-    }
-  }, []);
-
   const completeOnboarding = useCallback((streams?: string[]) => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.setItem('myc-onboarded', '1');
-    }
     if (streams && streams.length) {
       setUserStreams(streams);
       setActiveStreams(streams); // open the hub focused on what they just picked
